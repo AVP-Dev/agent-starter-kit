@@ -2,10 +2,25 @@
 
 **English** | [Русская версия](README.ru.md)
 
+> [!NOTE]
+> **Language & Localization:** The default core rules (`AGENTS.md` and `docs/`) are written in Russian, as this kit was originally tailored for the Russian-speaking engineering community. However, **it is 100% language-agnostic**. If you work in English or another language, simply instruct your AI agent during onboarding:
+> *"Translate all starter kit rules and docs into English (or your target language) and adapt them to our project."* The agent will handle the translation instantly.
+
 A battle-tested starter kit providing software engineering standards, architectural foundations, and automated verification protocols for autonomous AI coding agents:
 - **Gemini Antigravity** (native SSOT via `AGENTS.md`)
 - **Claude Code** (symlinked `CLAUDE.md -> AGENTS.md`)
 - **OpenAI Codex / GitHub Copilot** (symlinked `.github/copilot-instructions.md -> AGENTS.md`)
+
+---
+
+## 📖 Deep-Dive Article Series
+
+This starter kit is the practical implementation of the AI engineering methodology published in the essay series:
+👉 **[Control Ideas, Not Code (AVPDev Blog)](https://avpdev.com/ru/blog/control-ideas-not-code/)**
+
+- **Part 1:** [Control Ideas, Not Code](https://avpdev.com/ru/blog/control-ideas-not-code/) — Shifting from syntax-level coding to architectural control, system invariants, and intent management.
+- **Part 2:** *Automated Verification Gates & Failure Modes* *(Coming soon)*
+- **Part 3:** *The Skeleton + Disposable Modules Architecture: From Theory to Production* *(Coming soon)*
 
 ---
 
