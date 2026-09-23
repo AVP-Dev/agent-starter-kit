@@ -33,6 +33,7 @@ agent-starter-kit/
 ├── docs/                          # Architectural core documentation
 │   ├── onboarding-protocol.md     # ⚡ Automated repository scanning & onboarding protocol
 │   ├── architecture.md            # System architecture (Skeleton + Pluggable Modules)
+│   ├── theme-tokens.md            # 🎨 Semantic design tokens spec & hot-swappable themes
 │   ├── decisions.md               # Architecture Decision Records (ADR-001, ADR-002)
 │   ├── state.md                   # Session ledger (Done / In Progress / Tech Debt)
 │   ├── glossary.md                # Domain terminology glossary

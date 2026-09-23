@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2026.3.0] - 2026-09-23
+
+### Added
+- **Theme-Driven Visual Architecture & Hot-Swapping:** Added Section 4.5 in `AGENTS.md` and dedicated specification `docs/theme-tokens.md` establishing the invariant *Zero Hardcoded Colors in Components*. All components consume semantic CSS variables/tokens (`--background`, `--foreground`, `--primary`, `--muted`, `--border`, `--radius`), allowing hot-swapping or adding new themes with zero component edits.
+- **Anti-AI-Slop Visual Hierarchy:** Integrated strict UI invariants: max 1 Primary CTA per viewport, explicit element states (`:hover`, `:active`, `:focus-visible`, `:disabled`, loading state), semantic HTML without unstyled `div` clicks, and WCAG AA contrast >= 4.5:1.
+- **Grill-Me Architectural Frontier:** Adapted Matt Pocock's questioning methodology into `docs/design-manifest-template.md` (Section 0) and `docs/onboarding-protocol.md`: finding facts is the agent's job; deciding architecture is the human's. Ambiguous forks are resolved via structured rounds with recommended answers prior to code generation.
+- **Dual-Track Onboarding (Brownfield vs Greenfield):** Refined `docs/onboarding-protocol.md` with two explicit execution tracks:
+  - *Track A (Brownfield):* 100% automated scanning of manifests (`package.json`, `go.mod`, `pyproject.toml`, lockfiles) with zero interrogation.
+  - *Track B (Greenfield):* Structured 4-question architectural interview offering the baseline AVPDev reference stack as the default.
+
+---
+
 ## [2026.2.0] - 2026-09-23
 
 ### Changed

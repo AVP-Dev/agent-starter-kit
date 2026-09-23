@@ -55,6 +55,7 @@ echo "  ├── CLAUDE.md -> AGENTS.md         # Симлинк для Claude 
 echo "  └── docs/"
 echo "      ├── onboarding-protocol.md     # Автоматический протокол сканирования и заполнения"
 echo "      ├── architecture.md            # Каркас Skeleton + Modules"
+echo "      ├── theme-tokens.md            # Контракт дизайн-токенов и тем оформления"
 echo "      ├── decisions.md               # Реестр ADR"
 echo "      ├── state.md                   # Сессионный журнал"
 echo "      ├── glossary.md                # Глоссарий"
