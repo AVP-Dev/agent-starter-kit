@@ -9,7 +9,6 @@
 A battle-tested starter kit providing software engineering standards, architectural foundations, and automated verification protocols for autonomous AI coding agents:
 - **Gemini Antigravity** (native SSOT via `AGENTS.md`)
 - **Claude Code** (symlinked `CLAUDE.md -> AGENTS.md`)
-- **OpenAI Codex / GitHub Copilot** (symlinked `.github/copilot-instructions.md -> AGENTS.md`)
 
 ---
 
@@ -30,8 +29,6 @@ This starter kit is the practical implementation of the AI engineering methodolo
 agent-starter-kit/
 ├── AGENTS.md                      # Single Source of Truth for rules, stack, and gates
 ├── CLAUDE.md                      # Symlink to AGENTS.md (Claude Code compatibility)
-├── .github/
-│   └── copilot-instructions.md    # Symlink to AGENTS.md (GitHub Copilot / Codex)
 ├── docs/                          # Architectural core documentation
 │   ├── onboarding-protocol.md     # ⚡ Automated repository scanning & onboarding protocol
 │   ├── architecture.md            # System architecture (Skeleton + Pluggable Modules)
@@ -90,7 +87,7 @@ The agent utilizes Context7 MCP (`resolve-library-id` → `query-docs`) or web s
 You **do not need to write project descriptions manually**. The agent inspects your repository and synthesizes all necessary standards following [docs/onboarding-protocol.md](docs/onboarding-protocol.md).
 
 ### Scenario A: Standalone Kit on Your Machine
-You open a new or existing repository (including large monorepos) in your IDE or terminal. Simply prompt your AI agent (Antigravity, Claude Code, Copilot/Codex):
+You open a new or existing repository (including large monorepos) in your IDE or terminal. Simply prompt your AI agent:
 
 > **Copy & Paste Prompt:**
 > ```text
@@ -108,7 +105,7 @@ You open a new or existing repository (including large monorepos) in your IDE or
    ```bash
    /path/to/agent-starter-kit/scripts/init-project.sh /path/to/your-project
    ```
-   *The script copies rules, links `CLAUDE.md` and `.github/copilot-instructions.md`, and creates `docs/` without overwriting pre-existing files.*
+   *The script copies ruleslinks `CLAUDE.md`, and creates `docs/` without overwriting pre-existing files.*
 2. Open your project with your AI agent and prompt:
    > **Copy & Paste Prompt:**
    > ```text

@@ -4,7 +4,7 @@ set -euo pipefail
 # ==============================================================================
 # Script: init-project.sh
 # Purpose: Initialize AI Engineering Standard & Rules in any target repository.
-# Ecosystem: Gemini Antigravity, Claude Code, OpenAI Codex / GitHub Copilot.
+# Ecosystem: Gemini Antigravity, Claude Code.
 # Usage: ./init-project.sh /path/to/target-project
 # ==============================================================================
 
@@ -37,9 +37,7 @@ cp "$STARTER_KIT_DIR/AGENTS.md" "$TARGET_DIR/"
 # 2. Создаем симлинк CLAUDE.md -> AGENTS.md для Claude Code
 (cd "$TARGET_DIR" && ln -sf AGENTS.md CLAUDE.md)
 
-# 3. Настраиваем интеграцию для OpenAI Codex / GitHub Copilot
-mkdir -p "$TARGET_DIR/.github"
-(cd "$TARGET_DIR/.github" && ln -sf ../AGENTS.md copilot-instructions.md)
+
 
 # 4. Копируем директорию docs/ без перезаписи существующих файлов (POSIX-совместимо)
 mkdir -p "$TARGET_DIR/docs"
@@ -56,7 +54,6 @@ echo "✅ Успешно инициализировано!"
 echo "Файлы добавлены в $TARGET_DIR:"
 echo "  ├── AGENTS.md                      # Единый стандарт (Antigravity & Общий SSOT)"
 echo "  ├── CLAUDE.md -> AGENTS.md         # Инструкции для Claude Code"
-echo "  ├── .github/copilot-instructions.md# Инструкции для GitHub Copilot / Codex"
 echo "  └── docs/"
 echo "      ├── onboarding-protocol.md     # Автоматический протокол сканирования и заполнения"
 echo "      ├── architecture.md            # Каркас Skeleton + Modules"

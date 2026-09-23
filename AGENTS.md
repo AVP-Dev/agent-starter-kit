@@ -1,8 +1,8 @@
 # Project: [НАЗВАНИЕ ПРОЕКТА]
 
 > Этот файл — ИНДЕКС и СТАНДАРТ РАЗРАБОТКИ. Этот файл автоматически читают
-> AI-агенты: **Gemini Antigravity**, **Claude Code**, **OpenAI Codex / GitHub Copilot** и др.
-> Симлинки: `CLAUDE.md -> AGENTS.md`, `.github/copilot-instructions.md -> AGENTS.md`.
+> AI-агенты: **Gemini Antigravity** и **Claude Code**
+> Симлинк: `CLAUDE.md -> AGENTS.md`.
 
 ---
 
@@ -43,8 +43,6 @@
 │   └── design-manifest-template.md# Шаблон предпроектного манифеста (Zero Vibe Coding)
 ├── tests/                         # Автотесты (юнит-, интеграционные, e2e)
 ├── scripts/                       # Скрипты автоматизации и миграций
-├── .github/
-│   └── copilot-instructions.md    # Симлинк на AGENTS.md (для GitHub Copilot / Codex)
 ├── CLAUDE.md                      # Симлинк на AGENTS.md (для Claude Code)
 └── AGENTS.md                      # Единый SSOT правил разработки
 ```
