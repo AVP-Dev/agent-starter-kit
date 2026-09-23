@@ -4,7 +4,7 @@ set -euo pipefail
 # ==============================================================================
 # Script: init-project.sh
 # Purpose: Initialize AI Engineering Standard & Rules in any target repository.
-# Ecosystem: Gemini Antigravity, Claude Code.
+# Ecosystem: Universal AI Coding Agents (Gemini Antigravity, Claude Code, Cursor, Windsurf, Roo Code, Cline, Codex, etc.)
 # Usage: ./init-project.sh /path/to/target-project
 # ==============================================================================
 
@@ -31,15 +31,13 @@ fi
 
 echo "Инициализация стандартов AI Engineering в: $TARGET_DIR"
 
-# 1. Копируем AGENTS.md
+# 1. Копируем AGENTS.md (открытый стандарт SSOT)
 cp "$STARTER_KIT_DIR/AGENTS.md" "$TARGET_DIR/"
 
 # 2. Создаем симлинк CLAUDE.md -> AGENTS.md для Claude Code
 (cd "$TARGET_DIR" && ln -sf AGENTS.md CLAUDE.md)
 
-
-
-# 4. Копируем директорию docs/ без перезаписи существующих файлов (POSIX-совместимо)
+# 3. Копируем директорию docs/ без перезаписи существующих файлов (POSIX-совместимо)
 mkdir -p "$TARGET_DIR/docs"
 for doc in "$STARTER_KIT_DIR/docs/"*.md; do
   [ -f "$doc" ] || continue
@@ -52,8 +50,8 @@ done
 echo ""
 echo "✅ Успешно инициализировано!"
 echo "Файлы добавлены в $TARGET_DIR:"
-echo "  ├── AGENTS.md                      # Единый стандарт (Antigravity & Общий SSOT)"
-echo "  ├── CLAUDE.md -> AGENTS.md         # Инструкции для Claude Code"
+echo "  ├── AGENTS.md                      # Универсальный открытый стандарт (SSOT для всех агентов)"
+echo "  ├── CLAUDE.md -> AGENTS.md         # Симлинк для Claude Code"
 echo "  └── docs/"
 echo "      ├── onboarding-protocol.md     # Автоматический протокол сканирования и заполнения"
 echo "      ├── architecture.md            # Каркас Skeleton + Modules"

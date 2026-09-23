@@ -6,9 +6,10 @@
 > **Language & Localization:** The default core rules (`AGENTS.md` and `docs/`) are written in Russian, as this kit was originally tailored for the Russian-speaking engineering community. However, **it is 100% language-agnostic**. If you work in English or another language, simply instruct your AI agent during onboarding:
 > *"Translate all starter kit rules and docs into English (or your target language) and adapt them to our project."* The agent will handle the translation instantly.
 
-A battle-tested starter kit providing software engineering standards, architectural foundations, and automated verification protocols for autonomous AI coding agents:
-- **Gemini Antigravity** (native SSOT via `AGENTS.md`)
-- **Claude Code** (symlinked `CLAUDE.md -> AGENTS.md`)
+A battle-tested, vendor-neutral starter kit providing software engineering standards, architectural foundations, and automated verification protocols for **all autonomous AI coding agents**:
+- **Universal Agent Standard:** Built on the open `AGENTS.md` specification (stewarded by the Agentic AI Foundation / Linux Foundation), universally parsed by **Gemini Antigravity**, **Claude Code**, **Cursor**, **Windsurf**, **Roo Code**, **Cline**, **Codex**, **GitHub Copilot**, **Aider**, **OpenCode**, and custom agents.
+- **Claude Code Ready:** Zero-overhead compatibility via `CLAUDE.md -> AGENTS.md` symlink.
+- **100% Agent- & Language-Agnostic:** Operates on strict architectural contracts, system invariants, and Zero Vibe Coding, regardless of your IDE, terminal agent, or programming language.
 
 ---
 
@@ -38,6 +39,7 @@ agent-starter-kit/
 │   └── design-manifest-template.md# Zero Vibe Coding pre-project design manifest
 ├── scripts/
 │   └── init-project.sh            # One-click non-destructive setup script
+├── CHANGELOG.md                   # Kit version history and releases
 ├── README.md                      # English documentation (this file)
 └── README.ru.md                   # Russian documentation
 ```

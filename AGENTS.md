@@ -1,8 +1,8 @@
 # Project: [НАЗВАНИЕ ПРОЕКТА]
 
-> Этот файл — ИНДЕКС и СТАНДАРТ РАЗРАБОТКИ. Этот файл автоматически читают
-> AI-агенты: **Gemini Antigravity** и **Claude Code**
-> Симлинк: `CLAUDE.md -> AGENTS.md`.
+> Этот файл — ЕДИНЫЙ ИНДЕКС И СТАНДАРТ РАЗРАБОТКИ (Single Source of Truth).
+> Открытый стандарт `AGENTS.md` (Agentic AI Foundation / Linux Foundation), нативно поддерживаемый всеми современными автономными ИИ-агентами: **Gemini Antigravity**, **Claude Code**, **Cursor**, **Windsurf**, **Roo Code**, **Cline**, **Codex**, **GitHub Copilot**, **Aider**, **OpenCode** и др.
+> Симлинк для Claude Code: `CLAUDE.md -> AGENTS.md`.
 
 ---
 
@@ -13,7 +13,8 @@
 
 ## 2. Актуальный технологический стек (Стандарт 2026)
 
-*При генерации кода всегда сверяйтесь с реальным `package.json` / `pyproject.toml` / `go.mod` проекта. Если стек в проекте отличается от шаблона ниже — адаптируйте под существующий.*
+> ⚡ **Zero-Friction Auto-Onboarding:** Данный раздел актуализируется ИИ-агентом **автоматически** при запуске протокола онбординга ([docs/onboarding-protocol.md](docs/onboarding-protocol.md)) на основе реальных манифестов кодовой базы (`package.json`, `pnpm-lock.yaml`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `Dockerfile`).
+> Список ниже — эталонный стек 2026 года для новых проектов. При онбординге существующего репозитория агент адаптирует этот раздел под фактический стек проекта без ручной работы человека.
 
 - **Среда выполнения и языки:** Node.js 26 LTS / Bun 1.3+ / Python 3.13–3.14 / Go 1.27+ / TypeScript 5.8+
 - **Фронтенд:** Next.js (App Router) / React / Astro (SSG/контент) / Tailwind CSS
