@@ -6,6 +6,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2026.4.2] - 2026-09-25
+
+### Added
+- Added `tests/template-hygiene.test.sh` for public-file, ignore-pattern, symlink and theme-contract checks.
+- Added rollback cleanup and unsafe directory-symlink rejection to `init-project.sh`.
+
+### Fixed
+- Added a cross-stack `.gitignore` baseline and non-destructive `.gitignore` onboarding.
+- Corrected the Node.js release labels to distinguish Node.js 24 LTS from Node.js 26 Current.
+- Completed the Nord theme token contract and aligned the root token list.
+- Made the security scanner inspect tracked generated files and fail on unreadable files.
+- Aligned verification profile validation, duplicate-name checks, command review output, blocked-state documentation, and stale ADR references.
+
+---
+
 ## [2026.4.1] - 2026-09-25
 
 ### Added

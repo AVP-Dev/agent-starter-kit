@@ -76,16 +76,25 @@
 ```css
 /* Пример: Скандинавская палитра (Nord Theme) */
 [data-theme="nord"] {
-  --background: 220 16% 22%;          /* Nord Polar Night #2E3440 */
-  --foreground: 218 27% 94%;          /* Nord Snow Storm #ECEFF4 */
+  --background: 220 16% 22%;
+  --foreground: 218 27% 94%;
   --card: 222 16% 28%;
   --card-foreground: 218 27% 94%;
-  --primary: 193 43% 67%;             /* Nord Frost #88C0D0 */
+  --popover: 222 16% 28%;
+  --popover-foreground: 218 27% 94%;
+  --primary: 193 43% 67%;
   --primary-foreground: 220 16% 22%;
+  --secondary: 213 32% 52%;
+  --secondary-foreground: 218 27% 94%;
+  --accent: 193 43% 67%;
+  --accent-foreground: 220 16% 22%;
   --muted: 220 17% 32%;
   --muted-foreground: 219 14% 71%;
   --border: 220 17% 32%;
+  --input: 220 17% 32%;
   --ring: 193 43% 67%;
+  --destructive: 354 42% 54%;
+  --destructive-foreground: 0 0% 98%;
   --radius: 0.375rem;
 }
 ```

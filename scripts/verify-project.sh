@@ -18,6 +18,7 @@ PROFILE_PATH="scripts/verification-profile.tsv"
 ONLY=""
 LIST_ONLY=0
 DRY_RUN=0
+seen_names=""
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -75,6 +76,9 @@ selected_layer() {
 }
 
 if [ -n "$ONLY" ]; then
+  case "$ONLY" in
+    ,*|*,|*,,*) fail "пустой слой в --only" ;;
+  esac
   IFS=',' read -r -a requested_layers <<<"$ONLY"
   [ "${#requested_layers[@]}" -gt 0 ] || fail "пустой --only"
   for layer in "${requested_layers[@]}"; do
@@ -114,13 +118,17 @@ while IFS=$'\t' read -r name layer required command extra || [ -n "${name:-}${la
     *) fail "строка $line_number: required должен быть 0 или 1" ;;
   esac
   [ -n "$command" ] || fail "строка $line_number: команда не может быть пустой"
+  case ";$seen_names;" in
+    *";$name;"*) fail "строка $line_number: повторяющееся имя проверки '$name'" ;;
+  esac
+  seen_names="$seen_names;$name"
   found=1
 
   if [ "$LIST_ONLY" -eq 1 ]; then
     if selected_layer "$layer"; then
-      printf '%s\t%s\t%s\n' "$name" "$layer" "$required"
+      printf '%s\t%s\t%s\t%s\n' "$name" "$layer" "$required" "$command"
     else
-      printf '%s\t%s\t%s\tskipped\n' "$name" "$layer" "$required"
+      printf '%s\t%s\t%s\t%s\tskipped\n' "$name" "$layer" "$required" "$command"
     fi
     continue
   fi
@@ -130,7 +138,7 @@ while IFS=$'\t' read -r name layer required command extra || [ -n "${name:-}${la
   printf '[verify] %s (%s)\n' "$name" "$layer"
 
   if [ "$DRY_RUN" -eq 1 ]; then
-    printf '[verify] dry-run: команда не запущена\n'
+    printf '[verify] dry-run: %s\n' "$command"
     continue
   fi
 

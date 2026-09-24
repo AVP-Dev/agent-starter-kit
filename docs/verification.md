@@ -144,9 +144,11 @@ Dispatcher запускает команды из профиля через `bas
 ./scripts/verify-project.sh
 ```
 
-Отсутствующий или невалидный профиль завершает dispatcher с кодом `2`, а не считает проверку успешной. Команда из `required=1` завершает gate с кодом `1`; optional-проверка превращается в warning. Команды и их exit code записываются в evidence без полного transcript.
+`--list` и `--dry-run` показывают имя, layer и command до запуска, чтобы review не зависел от догадок.
 
-`scripts/security-scan.sh` — dependency-free baseline для tracked и неигнорируемых untracked файлов: private key material, AWS/GCP key patterns, credentialed database URLs, вероятные sensitive assignments и `.env`-файлы. Сканер не печатает найденные значения, только `path:line` и категорию. Он не заменяет SAST, dependency audit, container scan или DAST; утверждённые проектные инструменты добавляются отдельными строками `security` в профиль.
+Отсутствующий или невалидный профиль завершает dispatcher с кодом `2`, а не считает проверку успешной. Команда из `required=1` завершает gate с кодом `1`; optional-проверка превращается в warning. Dispatcher печатает структурированный результат, а агент сохраняет краткий command, layer, exit code и ссылку на evidence в DESIGN-манифесте или `state.md` без полного transcript.
+
+`scripts/security-scan.sh` — dependency-free baseline для tracked и неигнорируемых untracked файлов, включая tracked generated artifacts: private key material, AWS/GCP key patterns, credentialed database URLs, вероятные sensitive assignments и `.env`-файлы. Сканер не печатает найденные значения, только `path:line` и категорию; unreadable file завершает scan с ошибкой. Он не заменяет SAST, dependency audit, container scan или DAST; утверждённые проектные инструменты добавляются отдельными строками `security` в профиль.
 
 Профиль не должен содержать токены, пароли или приватные ключи. Если команда может раскрыть секрет, она не включается в verification gate до отдельного решения и безопасного способа маскирования.
 
@@ -159,7 +161,7 @@ Dispatcher запускает команды из профиля через `bas
 5. Запустить `./scripts/verify-project.sh --dry-run`, затем полный gate.
 6. Зафиксировать baseline, ограничения окружения и evidence в DESIGN-манифесте и `state.md` целевого проекта.
 
-Если проект не может запустить слой проверки, профиль сохраняет его как `blocked` с причиной; отсутствие команды не превращается в успешный результат.
+Если проект не может запустить слой проверки, агент фиксирует его как `blocked` с причиной в DESIGN-манифесте и `state.md`; отсутствующая команда не добавляется в профиль как фиктивная успешная проверка.
 
 ## 12. Итоговый checklist
 

@@ -40,7 +40,7 @@ report() {
 
 skip_file() {
   case "$1" in
-    .git/*|node_modules/*|vendor/*|.venv/*|venv/*|dist/*|build/*|coverage/*|.next/*|target/*) return 0 ;;
+    .git/*) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -70,7 +70,10 @@ scan_file() {
   skip_file "$file" && return 0
   [ -L "$file" ] && return 0
   [ -f "$file" ] || return 0
-  [ -r "$file" ] || return 0
+  if [ ! -r "$file" ]; then
+    printf 'security-scan: файл недоступен для чтения: %s\n' "$file" >&2
+    return 2
+  fi
 
   case "${file##*/}" in
     .env)
@@ -79,7 +82,7 @@ scan_file() {
     .env.*)
       case "${file##*/}" in
         .env.example|.env.sample|.env.template) ;;
-        *) report "$file" 1 "tracked-environment-file" ;;
+        *) report "$file" 1 "environment-file" ;;
       esac
       ;;
   esac

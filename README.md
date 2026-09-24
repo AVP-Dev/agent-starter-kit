@@ -16,9 +16,9 @@ A battle-tested, vendor-neutral starter kit providing software engineering stand
 ## 📖 Deep-Dive Article Series
 
 This starter kit is the practical implementation of the AI engineering methodology published in the essay series:
-👉 **[Control Ideas, Not Code (AVPDev Blog)](https://avpdev.com/ru/blog/control-ideas-not-code/)**
+👉 **[Code Got Cheap. Engineering Thought Did Not (AVPDev Blog)](https://avpdev.com/ru/blog/control-ideas-not-code/)**
 
-- **Part 1:** [Control Ideas, Not Code](https://avpdev.com/ru/blog/control-ideas-not-code/) — Shifting from syntax-level coding to architectural control, system invariants, and intent management.
+- **Part 1:** [Code Got Cheap. Engineering Thought Did Not](https://avpdev.com/ru/blog/control-ideas-not-code/) — Shifting from syntax-level coding to architectural control, system invariants, and intent management.
 - **Part 2:** [AI Loves Straight Roads: Why Local Optimization Breaks Complex Systems](https://avpdev.com/ru/blog/ai-loves-straight-roads/) — Why removing architectural fences, queues, and boundaries creates technical debt even when local tests are green.
 - **Part 3:** [Architect of the Future: From Line-by-Line Review to Design Review](https://avpdev.com/ru/blog/architect-of-the-future/) — The `Skeleton + Pluggable Modules` pattern, `DESIGN.md` / Design Review, delegation boundaries, and the architect’s responsibility for system integrity.
 
@@ -29,6 +29,7 @@ This starter kit is the practical implementation of the AI engineering methodolo
 ```
 agent-starter-kit/
 ├── AGENTS.md                      # Single Source of Truth for rules, stack, and gates
+├── .gitignore                     # Cross-stack local/secret artifact baseline
 ├── CLAUDE.md                      # Symlink to AGENTS.md (Claude Code compatibility)
 ├── docs/                          # Architectural core documentation
 │   ├── onboarding-protocol.md     # ⚡ Automated repository scanning & onboarding protocol
@@ -115,7 +116,7 @@ Open a new or existing repository in your IDE or terminal and prompt your agent:
 
 ### Scenario B: Setup via `init-project.sh`
 
-The script only adds missing files and never overwrites existing project data:
+The script only adds missing files, never overwrites existing project data, and copies the baseline `.gitignore` only when it is absent:
 
 ```bash
 /path/to/agent-starter-kit/scripts/init-project.sh --yes /path/to/new-project
@@ -134,7 +135,7 @@ The agent preserves project-specific sections in `AGENTS.md`, adds only missing 
 
 ## 🛠️ Reference Tech Stack (2026 Standard)
 
-- **Runtimes & Languages:** Node.js 26 LTS / Bun 1.3+ / Python 3.13–3.14 / Go 1.27+ / TypeScript 5.8+
+- **Runtimes & Languages:** Node.js 24 LTS / Node.js 26 Current (LTS expected in October 2026) / Bun 1.3+ / Python 3.13–3.14 / Go 1.27+ / TypeScript 5.8+
 - **Frontend:** Next.js (App Router) / React / Astro / Tailwind CSS
 - **Backend & Background:** Next.js Server Actions / FastAPI / Go microservices / WebSockets / BullMQ (Redis)
 - **Databases & Vector:** PostgreSQL, Drizzle ORM, Redis, pgvector + HNSW indexes

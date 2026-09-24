@@ -12,6 +12,7 @@ DRY_RUN=0
 ASSUME_YES=0
 UPDATE_MODE=0
 TARGET_DIR=""
+CREATED_PATHS=()
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -106,6 +107,28 @@ if [ "$DRY_RUN" -eq 0 ]; then
   TARGET_DIR="$(cd "$TARGET_DIR" && pwd -P)"
 fi
 
+cleanup_on_exit() {
+  status=$?
+  trap - EXIT
+  if [ "$status" -ne 0 ] && [ "$DRY_RUN" -eq 0 ]; then
+    index=$((${#CREATED_PATHS[@]} - 1))
+    while [ "$index" -ge 0 ]; do
+      created_path="${CREATED_PATHS[$index]}"
+      if [ -L "$created_path" ]; then
+        rm -f "$created_path" || true
+      elif [ -d "$created_path" ]; then
+        rmdir "$created_path" 2>/dev/null || true
+      elif [ -e "$created_path" ]; then
+        rm -f "$created_path" || true
+      fi
+      index=$((index - 1))
+    done
+  fi
+  exit "$status"
+}
+
+trap cleanup_on_exit EXIT
+
 if [ -e "$TARGET_DIR/AGENTS.md" ] || [ -L "$TARGET_DIR/AGENTS.md" ]; then
   if [ ! -f "$TARGET_DIR/AGENTS.md" ] && [ ! -L "$TARGET_DIR/AGENTS.md" ]; then
     printf 'Путь AGENTS.md существует и не является файлом: %s\n' "$TARGET_DIR/AGENTS.md" >&2
@@ -120,11 +143,28 @@ if [ -e "$TARGET_DIR/CLAUDE.md" ] || [ -L "$TARGET_DIR/CLAUDE.md" ]; then
   fi
 fi
 
+if [ -e "$TARGET_DIR/.gitignore" ] || [ -L "$TARGET_DIR/.gitignore" ]; then
+  if [ ! -f "$TARGET_DIR/.gitignore" ] && [ ! -L "$TARGET_DIR/.gitignore" ]; then
+    printf 'Путь .gitignore существует и не является файлом: %s\n' "$TARGET_DIR/.gitignore" >&2
+    exit 1
+  fi
+fi
+
+if [ -L "$TARGET_DIR/docs" ]; then
+  printf 'Симлинк на docs не поддерживается: %s\n' "$TARGET_DIR/docs" >&2
+  exit 1
+fi
+
 if [ -e "$TARGET_DIR/docs" ] || [ -L "$TARGET_DIR/docs" ]; then
   if [ ! -d "$TARGET_DIR/docs" ]; then
     printf 'Путь docs существует и не является диреторией: %s\n' "$TARGET_DIR/docs" >&2
     exit 1
   fi
+fi
+
+if [ -L "$TARGET_DIR/scripts" ]; then
+  printf 'Симлинк на scripts не поддерживается: %s\n' "$TARGET_DIR/scripts" >&2
+  exit 1
 fi
 
 if [ -e "$TARGET_DIR/scripts" ] || [ -L "$TARGET_DIR/scripts" ]; then
@@ -156,7 +196,7 @@ for tool in verify-project.sh security-scan.sh; do
 done
 
 PROJECT_KIND="greenfield"
-for marker in .git AGENTS.md CLAUDE.md README.md README.ru.md docs package.json pnpm-lock.yaml yarn.lock bun.lockb pyproject.toml requirements.txt go.mod Cargo.toml Dockerfile Makefile src app lib tests; do
+for marker in .git .gitignore AGENTS.md CLAUDE.md README.md README.ru.md docs scripts package.json pnpm-lock.yaml yarn.lock bun.lockb pyproject.toml requirements.txt go.mod Cargo.toml Dockerfile Makefile src app lib tests; do
   if [ -e "$TARGET_DIR/$marker" ]; then
     PROJECT_KIND="brownfield"
     break
@@ -182,6 +222,7 @@ copy_if_missing() {
     return 0
   fi
 
+  CREATED_PATHS+=("$destination_path")
   cp "$source_path" "$destination_path"
   printf 'Добавлено: %s\n' "$destination_name"
 }
@@ -199,6 +240,7 @@ else
     printf 'Не удалось создать symlink CLAUDE.md -> AGENTS.md. Операция остановлена без копирования файлов.\n' >&2
     exit 1
   fi
+  CREATED_PATHS+=("$TARGET_DIR/CLAUDE.md")
   printf 'Добавлено: CLAUDE.md -> AGENTS.md\n'
 fi
 
@@ -206,6 +248,7 @@ if [ ! -d "$TARGET_DIR/docs" ]; then
   if [ "$DRY_RUN" -eq 1 ]; then
     printf 'Будет создано: docs/\n'
   else
+    CREATED_PATHS+=("$TARGET_DIR/docs")
     mkdir -p "$TARGET_DIR/docs"
     printf 'Создано: docs/\n'
   fi
@@ -214,11 +257,13 @@ else
 fi
 
 copy_if_missing "$STARTER_KIT_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md"
+copy_if_missing "$STARTER_KIT_DIR/.gitignore" "$TARGET_DIR/.gitignore"
 
 if [ ! -d "$TARGET_DIR/scripts" ]; then
   if [ "$DRY_RUN" -eq 1 ]; then
     printf 'Будет создано: scripts/\n'
   else
+    CREATED_PATHS+=("$TARGET_DIR/scripts")
     mkdir -p "$TARGET_DIR/scripts"
     printf 'Создано: scripts/\n'
   fi

@@ -4,6 +4,7 @@
 > Открытый стандарт `AGENTS.md` (Agentic AI Foundation / Linux Foundation), нативно поддерживаемый всеми современными автономными ИИ-агентами: **Gemini Antigravity**, **Claude Code**, **Cursor**, **Windsurf**, **Roo Code**, **Cline**, **Codex**, **GitHub Copilot**, **Aider**, **OpenCode** и др.
 > Симлинк для Claude Code: `CLAUDE.md -> AGENTS.md`.
 > Методологическая база: [AI loves straight roads](https://avpdev.com/ru/blog/ai-loves-straight-roads/) и [Architect of the Future](https://avpdev.com/ru/blog/architect-of-the-future/).
+> Поля в квадратных скобках — намеренные onboarding-слоты стартер-кита, а не незавершённые данные текущего проекта.
 
 ---
 
@@ -17,7 +18,7 @@
 > ⚡ **Zero-Friction Auto-Onboarding:** Данный раздел актуализируется ИИ-агентом **автоматически** при запуске протокола онбординга ([docs/onboarding-protocol.md](docs/onboarding-protocol.md)) на основе реальных манифестов кодовой базы (`package.json`, `pnpm-lock.yaml`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `Dockerfile`).
 > Список ниже — эталонный стек 2026 года для новых проектов. При онбординге существующего репозитория агент адаптирует этот раздел под фактический стек проекта без ручной работы человека.
 
-- **Среда выполнения и языки:** Node.js 26 LTS / Bun 1.3+ / Python 3.13–3.14 / Go 1.27+ / TypeScript 5.8+
+- **Среда выполнения и языки:** Node.js 24 LTS / Node.js 26 Current (LTS ожидается в октябре 2026) / Bun 1.3+ / Python 3.13–3.14 / Go 1.27+ / TypeScript 5.8+
 - **Фронтенд:** Next.js (App Router) / React / Astro (SSG/контент) / Tailwind CSS
 - **Бэкенд и фоновые задачи:** Next.js Server Actions / Route Handlers, FastAPI (Python), Go микросервисы, REST API, WebSockets, BullMQ (очереди задач)
 - **Базы данных и кэш:** PostgreSQL, Drizzle ORM, Redis (кэширование, pub/sub, очереди)
@@ -43,6 +44,7 @@
 ```
 [корень]/
 ├── src/ (или apps/ + packages/)    # Исходный код приложения
+├── .gitignore                     # Базовый ignore для локальных/секретных артефактов
 ├── docs/                          # Инженерная документация
 │   ├── architecture.md            # Архитектурный каркас (Skeleton + Modules)
 │   ├── theme-tokens.md            # Контракт дизайн-токенов и тем оформления (Zero Hardcoded Colors)
@@ -108,7 +110,7 @@
 1. **Инвариант «Zero Hardcoded Colors in Components»:**
    - Категорически запрещено зашивать в верстку компонентов сырые hex-коды (`#1e293b`), arbitrary values или жестко зашитые классы базовых палитр (напр. `bg-zinc-900`, `text-blue-500`).
    - Вся стилизация строится **исключительно на семантических дизайн-токенах / CSS-переменных**:
-     `--background`, `--foreground`, `--primary`, `--primary-foreground`, `--muted`, `--muted-foreground`, `--accent`, `--accent-foreground`, `--border`, `--input`, `--ring`, `--radius`.
+     `--background`, `--foreground`, `--card`, `--card-foreground`, `--popover`, `--popover-foreground`, `--primary`, `--primary-foreground`, `--secondary`, `--secondary-foreground`, `--accent`, `--accent-foreground`, `--muted`, `--muted-foreground`, `--border`, `--input`, `--ring`, `--destructive`, `--destructive-foreground`, `--radius`.
    - Любая тема (светлая, тёмная, корпоративная, нео-брутализм, скандинавская, киберпанк и др.) объявляется как изолированный набор значений токенов (`:root`, `.dark`, `[data-theme="..."]`).
    - Добавление, замена или переключение темы оформления в проекте обязаны производиться **без модификации кода компонентов** (Zero Component Edits).
 2. **Иерархия действий и типографика (Anti-AI-Slop):**

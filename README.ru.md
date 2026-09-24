@@ -16,9 +16,9 @@
 ## 📖 Философия и цикл статей
 
 Этот стартер-кит — практическая реализация методологии осознанного AI-инжиниринга, подробно описанной в цикле статей:
-👉 **[Управляй идеями, а не кодом (Блог AVPDev)](https://avpdev.com/ru/blog/control-ideas-not-code/)**
+👉 **[Код стал дешёвым. Инженерное мышление — нет (Блог AVPDev)](https://avpdev.com/ru/blog/control-ideas-not-code/)**
 
-- **Часть 1:** [Управляй идеями, а не кодом](https://avpdev.com/ru/blog/control-ideas-not-code/) — Переход от ручного кодинга к системному контролю инвариантов и архитектуры.
+- **Часть 1:** [Код стал дешёвым. Инженерное мышление — нет](https://avpdev.com/ru/blog/control-ideas-not-code/) — Переход от ручного кодинга к системному контролю инвариантов и архитектуры.
 - **Часть 2:** [AI любит прямые дороги: почему локальная оптимизация рушит сложные системы](https://avpdev.com/ru/blog/ai-loves-straight-roads/) — Почему удаление архитектурных «заборов», очередей и границ создаёт технический долг даже при зелёных локальных тестах.
 - **Часть 3:** [Архитектор будущего: от построчного ревью к Design Review](https://avpdev.com/ru/blog/architect-of-the-future/) — Паттерн `Skeleton + Pluggable Modules`, `DESIGN.md` / Design Review, границы делегирования и ответственность архитектора за целостность системы.
 
@@ -29,6 +29,7 @@
 ```
 agent-starter-kit/
 ├── AGENTS.md                      # Единый SSOT правил разработки, стека и верификации
+├── .gitignore                     # Базовый ignore для локальных и секретных артефактов
 ├── CLAUDE.md                      # Симлинк на AGENTS.md (для Claude Code)
 ├── docs/                          # Архитектурное ядро документации
 │   ├── onboarding-protocol.md     # ⚡ Автоматический протокол сканирования и онбординга проекта
@@ -80,7 +81,7 @@ agent-starter-kit/
    * Verification & Safety добавляет pre-change impact checks, positive/negative/security/regression слои, безопасные probes и targeted escalation.
    * Vendor-specific runtime-сервер не требуется; оркестрация остаётся документированной ролью.
    * Выбор конкретных моделей в стандарт не входит.
-   * Подробности: [docs/agent-routing.md](docs/agent-routing.md).
+   * Подробности: [docs/agent-routing.md](docs/agent-routing.md) и [docs/verification.md](docs/verification.md).
 
 ---
 
@@ -120,7 +121,7 @@ agent-starter-kit/
 /path/to/agent-starter-kit/scripts/init-project.sh --update /путь/к/существующему-проекту
 ```
 
-Скрипт добавляет только отсутствующие файлы, не перезаписывает существующие `AGENTS.md`, `CLAUDE.md`, `docs/*` и инструменты в `scripts/`, а затем передаёт проект агенту для сканирования и заполнения. В целевой проект попадают универсальный dispatcher, baseline scanner и шаблон профиля; активный профиль агент создаёт по манифестам. `--update` предназначен только для существующего проекта и не создаёт новый каталог.
+Скрипт добавляет только отсутствующие файлы, не перезаписывает существующие `AGENTS.md`, `CLAUDE.md`, `.gitignore`, `docs/*` и инструменты в `scripts/`, а затем передаёт проект агенту для сканирования и заполнения. В целевой проект попадают универсальный dispatcher, baseline scanner и шаблон профиля; активный профиль агент создаёт по манифестам. `--update` предназначен только для существующего проекта и не создаёт новый каталог.
 
 ### Сценарий Г: Ручной режим
 
@@ -130,7 +131,7 @@ agent-starter-kit/
 
 ## 🛠️ Базовый эталонный стек (Редакция 2026)
 
-- **Среда выполнения:** Node.js 26 LTS / Bun 1.3+ / Python 3.13–3.14 / Go 1.27+ / TypeScript 5.8+
+- **Среда выполнения:** Node.js 24 LTS / Node.js 26 Current (ожидается LTS в октябре 2026) / Bun 1.3+ / Python 3.13–3.14 / Go 1.27+ / TypeScript 5.8+
 - **Фронтенд:** React / Next.js (App Router) / Astro / Tailwind CSS
 - **Бэкенд:** Next.js Server Actions / FastAPI / Go microservices / WebSockets / BullMQ (Redis)
 - **Базы данных:** PostgreSQL, Drizzle ORM, Redis

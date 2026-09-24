@@ -68,8 +68,21 @@ assert_status 0 "$TMP_ROOT/runner/scripts/verify-project.sh" --dry-run
 printf 'failing\tstatic\t1\texit 7\n' >"$TMP_ROOT/runner/scripts/verification-profile.tsv"
 assert_status 1 "$TMP_ROOT/runner/scripts/verify-project.sh" --only static
 
+printf 'optional\tstatic\t0\texit 9\n' >"$TMP_ROOT/runner/scripts/verification-profile.tsv"
+assert_status 0 "$TMP_ROOT/runner/scripts/verify-project.sh" --only static
+assert_contains "$TMP_ROOT/command-output" 'warning'
+
+printf 'same\tstatic\t1\ttrue\nsame\tstatic\t1\ttrue\n' >"$TMP_ROOT/runner/scripts/verification-profile.tsv"
+assert_status 2 "$TMP_ROOT/runner/scripts/verify-project.sh" --only static
+
+printf 'extra\tstatic\t1\ttrue\textra\n' >"$TMP_ROOT/runner/scripts/verification-profile.tsv"
+assert_status 2 "$TMP_ROOT/runner/scripts/verify-project.sh" --only static
+
 printf 'bad\tunknown\t1\ttrue\n' >"$TMP_ROOT/runner/scripts/verification-profile.tsv"
 assert_status 2 "$TMP_ROOT/runner/scripts/verify-project.sh" --only static
+
+printf 'valid\tstatic\t1\ttrue\n' >"$TMP_ROOT/runner/scripts/verification-profile.tsv"
+assert_status 2 "$TMP_ROOT/runner/scripts/verify-project.sh" --only static,
 
 rm "$TMP_ROOT/runner/scripts/verification-profile.tsv"
 assert_status 2 "$TMP_ROOT/runner/scripts/verify-project.sh" --only static
@@ -94,11 +107,36 @@ printf 'temporary\n' >"$TMP_ROOT/security-clean/.env"
 assert_status 1 "$TMP_ROOT/security-clean/scripts/security-scan.sh"
 assert_contains "$TMP_ROOT/command-output" 'environment-file'
 
+mkdir -p "$TMP_ROOT/security-clean/dist"
+printf 'password = "%s%s"\n' 'generated-' 'secret-value-123456' >"$TMP_ROOT/security-clean/dist/generated.txt"
+git -C "$TMP_ROOT/security-clean" add -f dist/generated.txt
+assert_status 1 "$TMP_ROOT/security-clean/scripts/security-scan.sh"
+assert_contains "$TMP_ROOT/command-output" 'dist/generated.txt'
+
 make_project "$TMP_ROOT/bootstrap"
 "$ROOT/scripts/init-project.sh" --yes "$TMP_ROOT/bootstrap" >"$TMP_ROOT/bootstrap-output" 2>&1
 [ -x "$TMP_ROOT/bootstrap/scripts/verify-project.sh" ] || fail 'verify-project.sh was not copied'
 [ -x "$TMP_ROOT/bootstrap/scripts/security-scan.sh" ] || fail 'security-scan.sh was not copied'
 [ -f "$TMP_ROOT/bootstrap/docs/verification-profile.example.tsv" ] || fail 'profile example was not copied'
+[ -f "$TMP_ROOT/bootstrap/.gitignore" ] || fail '.gitignore was not copied'
 [ ! -f "$TMP_ROOT/bootstrap/scripts/verification-profile.tsv" ] || fail 'starter-kit profile was copied into target'
+git -C "$TMP_ROOT/bootstrap" init -q
+git -C "$TMP_ROOT/bootstrap" check-ignore --no-index -q .env || fail '.env is not ignored'
+git -C "$TMP_ROOT/bootstrap" check-ignore --no-index -q node_modules/example || fail 'node_modules is not ignored'
+git -C "$TMP_ROOT/bootstrap" check-ignore --no-index -q dist/example || fail 'dist is not ignored'
+
+mkdir -p "$TMP_ROOT/existing-ignore"
+printf 'custom-project-rule\n' >"$TMP_ROOT/existing-ignore/.gitignore"
+"$ROOT/scripts/init-project.sh" --yes "$TMP_ROOT/existing-ignore" >"$TMP_ROOT/existing-ignore-output" 2>&1
+assert_contains "$TMP_ROOT/existing-ignore/.gitignore" 'custom-project-rule'
+
+DRY_TARGET="$TMP_ROOT/dry-target"
+assert_status 0 "$ROOT/scripts/init-project.sh" --dry-run "$DRY_TARGET"
+[ ! -e "$DRY_TARGET" ] || fail 'dry-run created a target'
+
+mkdir -p "$TMP_ROOT/symlink-target" "$TMP_ROOT/external-docs"
+ln -s "$TMP_ROOT/external-docs" "$TMP_ROOT/symlink-target/docs"
+assert_status 1 "$ROOT/scripts/init-project.sh" --yes "$TMP_ROOT/symlink-target"
+[ ! -e "$TMP_ROOT/symlink-target/AGENTS.md" ] || fail 'init wrote through symlinked docs'
 
 printf 'verification tools: PASS\n'
