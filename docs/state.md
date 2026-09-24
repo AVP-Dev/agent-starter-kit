@@ -16,6 +16,14 @@
 **Что сейчас в работе:**
 - [ ] [Текущая задача, компонент или модуль в разработке]
 
+## Active Runs
+
+> Для длительных задач и multi-agent работы. Обновлять после каждого checkpoint или quality gate. Не записывать секреты и сырые транскрипты.
+
+| Run ID | Task / Topology | Owner | Scope | Status | Evidence | Last good commit | Next step |
+|---|---|---|---|---|---|---|---|
+| [run-id] | [задача / topology] | [worker или orchestrator] | [файлы/модули] | [planned / running / verified / accepted / blocked] | [ссылка на evidence] | [commit или `—`] | [одно действие] |
+
 **Что сломано / Известный техдолг:**
 - Нет (или конкретный список известных проблем и компромиссов, требующих решения).
 

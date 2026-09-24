@@ -38,6 +38,8 @@ agent-starter-kit/
 │   ├── state.md                   # Журнал состояния сессий (Что сделано / в работе / техдолг)
 │   ├── glossary.md                # Единый глоссарий доменных терминов
 │   ├── agent-routing.md            # Адаптивная маршрутизация и контроль контекста
+│   ├── project-structure.md        # Гигиена файлов, ownership и границы проекта
+│   ├── verification.md             # Impact, safety и политика test coverage
 │   └── design-manifest-template.md# Шаблон предпроектного манифеста (Zero Vibe Coding)
 ├── scripts/
 │   └── init-project.sh            # Скрипт быстрой безопасной установки в целевой проект
@@ -66,8 +68,13 @@ agent-starter-kit/
    * Проверка актуальных версий библиотек и сигнатур SDK через Context7 MCP во избежание галлюцинаций устаревших API. Согласование с человеком только при критических breaking changes.
 7. **Adaptive Agent Routing:**
    * Существующие Delegation Zones 1/2/3 отвечают за ответственность и риск.
-   * Отдельная политика topology выбирает между `single`, `fixed-pipeline`, `side-research`, `parallel` и `hierarchical`.
-   * По умолчанию используется `single`; runtime-оркестратор и выбор конкретных моделей в стандарт не входят.
+   * Для нетривиальной работы основной агент выступает оркестратором: определяет контракт, делегирует содержательную работу worker-агентам, проверяет evidence, запускает gates, интегрирует и принимает результат.
+   * По умолчанию используется `orchestrated`; `single` остаётся для тривиальных задач и явного fallback, а `fixed-pipeline`, `side-research`, `parallel` и `hierarchical` описывают специализированные формы работы.
+   * В длительных сессиях хранится task ledger и checkpoint после каждого gate; сырые транскрипты не накапливаются в основном контексте.
+   * Checkpoint не равен commit: commit создаётся только после зелёного gate, одной атомарной задачей, а push и PR остаются отдельными действиями.
+   * Verification & Safety добавляет pre-change impact checks, positive/negative/security/regression слои, безопасные probes и targeted escalation.
+   * Vendor-specific runtime-сервер не требуется; оркестрация остаётся документированной ролью.
+   * Выбор конкретных моделей в стандарт не входит.
    * Подробности: [docs/agent-routing.md](docs/agent-routing.md).
 
 ---

@@ -9,12 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2026.4.0] - 2026-09-24
 
 ### Added
-- **Adaptive Agent Routing:** Added `docs/agent-routing.md` with docs-only topology choices (`single`, `fixed-pipeline`, `side-research`, `parallel`, `hierarchical`) while preserving the existing Delegation Zones.
-- **Controlled Handoff Policy:** Added short context packets, side-research isolation, deterministic-first guidance, probe-before-refusal, test-integrity protection, and explicit fallback rules.
-- **Non-Destructive Onboarding Modes:** Extended the onboarding protocol and `init-project.sh` with brownfield/greenfield, manual, incremental-update, and dry-run workflows.
+- **Adaptive Agent Routing:** Added `docs/agent-routing.md` with docs-only topology choices (`orchestrated`, `single`, `fixed-pipeline`, `side-research`, `parallel`, `hierarchical`) while preserving the existing Delegation Zones.
+- **Controlled Handoff Policy:** Added short context packets, side-research isolation, deterministic-first guidance, probe-before-refusal, test-integrity protection, explicit fallback rules, and long-session checkpoint/recovery rules.
+- **Orchestrator-first Execution:** Made `orchestrated` the default for non-trivial tasks; `single` is now limited to trivial work or explicit capability fallback.
+- **Long Session Discipline:** Added task-ledger, checkpoint, context-compaction, and recovery rules to keep workers independent and the main context small.
+- **Repository Hygiene:** Added `docs/project-structure.md` with file-size, naming, ownership, shared-boundary, dependency-direction and onboarding guidance.
+- **Verification & Safety Policy:** Added `docs/verification.md` with pre-change impact checks, positive/negative/security/regression layers, safe probes, rollback, context budgets and targeted deep checks.
+- **Manifest Safety Fields:** Added `Pre-change impact check`, `Verification layers`, `Rollback / stop plan`, and `Context budget / escalation trigger` to the DESIGN manifest.
 
 ### Changed
 - Reduced model and runtime assumptions in the universal kit; no model routing, orchestration server, or platform-specific adapter is required.
+- Added ADR-004 for orchestrator-first delegation and checkpointed long sessions.
 - Added working hypotheses, topology, stop/escalation conditions, and replay reference to the DESIGN manifest.
 
 ### Fixed

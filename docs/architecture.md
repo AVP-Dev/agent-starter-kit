@@ -46,6 +46,7 @@
 - **Изоляция данных**: модули не имеют прямого доступа к приватным таблицам других модулей. Доступ к общему состоянию — строго через сервисы ядра или шину событий.
 - **Заменяемость (Disposable Modules)**: при изменении требований модуль выбрасывается целиком и генерируется ИИ с нуля по обновленному контракту без ручного рефакторинга ядра.
 - **Оркестрация без отдельного runtime**: выбор topology, handoff и правила side research описаны в [docs/agent-routing.md](agent-routing.md); стандарт не требует собственного сервера оркестрации.
+- **Verification и impact policy**: pre-change impact, positive/negative/security/regression проверки и recovery описаны в [docs/verification.md](verification.md).
 
 ---
 

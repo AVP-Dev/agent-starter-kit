@@ -38,6 +38,8 @@ agent-starter-kit/
 │   ├── state.md                   # Session ledger (Done / In Progress / Tech Debt)
 │   ├── glossary.md                # Domain terminology glossary
 │   ├── agent-routing.md            # Adaptive agent routing and context containment
+│   ├── project-structure.md        # File hygiene, ownership and project boundaries
+│   ├── verification.md             # Impact, safety and test-coverage policy
 │   └── design-manifest-template.md# Zero Vibe Coding pre-project design manifest
 ├── scripts/
 │   └── init-project.sh            # One-click non-destructive setup script
@@ -85,7 +87,7 @@ git fetch origin && git status -uno
 The agent utilizes Context7 MCP (`resolve-library-id` → `query-docs`) or web search to verify up-to-date SDK signatures and documentation before generating integration code. The agent prompts the user only if critical breaking changes exist; minor backward-compatible updates are adopted seamlessly.
 
 ### 7. Adaptive Agent Routing
-The kit uses the existing Delegation Zones 1/2/3 for responsibility and a small topology policy for execution: `single` by default, `fixed-pipeline` for known repeatable work, `side-research` for isolated investigation, `parallel` for genuinely independent work, and `hierarchical` for large decomposable tasks. It does not prescribe models or a runtime orchestrator. See [docs/agent-routing.md](docs/agent-routing.md).
+For non-trivial work the main agent is the orchestrator: it defines the contract, delegates substantive work to isolated workers, checks evidence, runs gates, integrates and accepts the result. The topology policy uses `orchestrated` by default, with `single` reserved for trivial or explicit fallback tasks and `fixed-pipeline`, `side-research`, `parallel`, and `hierarchical` for specialized shapes. For long sessions, keep a task ledger and checkpoint after each gate instead of retaining raw transcripts in the main context. Checkpoints are separate from commits: commits are created only after a green gate, one atomic task at a time, and push/PR remain separate actions. Verification & Safety adds pre-change impact checks, positive/negative/security/regression layers, safe probes and targeted escalation. It does not prescribe models or a vendor-specific runtime; orchestration remains a documentation-driven role. See [docs/agent-routing.md](docs/agent-routing.md) and [docs/verification.md](docs/verification.md).
 
 ---
 

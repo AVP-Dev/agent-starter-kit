@@ -19,13 +19,19 @@
 
 ## 1. Метаданные и скоуп
 - **Затронутые модули / сервисы:** [директории/пакеты, например: src/modules/rag, src/workers, src/components]
+- **File ownership / scope:** [Кто владеет каталогом/файлами и какие области изменять нельзя.]
+- **Large-file exception:** [Почему файл превышает soft limit и как будет разделён; `n/a`, если исключения нет.]
 - **Делегирование:** Zone 1 (100% AI) / Zone 2 (контрактное 50/50) / Zone 3 (Архитектор)
-- **Topology:** `single` / `fixed-pipeline` / `side-research` / `parallel` / `hierarchical`
+- **Topology:** `orchestrated` / `single` / `fixed-pipeline` / `side-research` / `parallel` / `hierarchical`
 - **Рабочие гипотезы:** [Что предполагается, но ещё не проверено. Не выдавать за факт.]
 - **Цель:** Краткое описание задачи (1-2 предложения).
 - **Stop / escalation conditions:** [Когда остановиться, запросить человека или повысить глубину рассуждения.]
 - **Run ID / replay reference:** [Идентификатор запуска или ссылка на воспроизводимый контекст.]
 - **Measured outcome:** `[accepted | rejected | blocked]`; [1–2 метрики и ссылка на evidence]. Заполняется после Verification Gate; для Lightweight — `n/a`.
+- **Pre-change impact check:** [Затронутые consumers, baseline и возможные последствия до правки.]
+- **Verification layers:** [static / positive / negative / security / regression / integration — что покрывается.]
+- **Rollback / stop plan:** [Как безопасно остановиться или откатить изменение при неудаче.]
+- **Context budget / escalation trigger:** [Лимит области проверки и условия targeted deep check.]
 - **Используемые SDK / библиотеки:** [например: @anthropic-ai/sdk, drizzle-orm, onnxruntime-node]. Актуальность сверена через Context7 MCP.
 
 ## 2. Инварианты системы (Invariants — что НЕ МОЖЕТ произойти ни при каких обстоятельствах)
