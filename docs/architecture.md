@@ -1,6 +1,7 @@
 # Архитектура проекта
 
 > Документ верхнеуровневой архитектуры: Каркас (Skeleton) и Сменные модули (Pluggable Modules).
+> Методологическая база: [AI любит прямые дороги](https://avpdev.com/ru/blog/ai-loves-straight-roads/) и [Архитектор будущего](https://avpdev.com/ru/blog/architect-of-the-future/).
 > Обновляется при структурных изменениях системы.
 
 ---

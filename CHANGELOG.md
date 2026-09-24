@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2026.4.1] - 2026-09-25
+
+### Added
+- **Project-local Verification Dispatcher:** Added `scripts/verify-project.sh` for explicit TSV-based verification commands, layer filtering, dry-run and fail-closed profile validation.
+- **Security Baseline:** Added dependency-free `scripts/security-scan.sh` for high-confidence secret patterns and environment-file checks without printing matched values.
+- **Profile Template:** Added `docs/verification-profile.example.tsv`; the starter kit also ships a runnable `scripts/verification-profile.tsv` for its own smoke gate, while onboarding creates target profiles from repository facts instead of guessing commands.
+
+### Changed
+- `init-project.sh` copies the generic dispatcher, scanner and profile template non-destructively.
+- Verification and onboarding documentation now distinguish universal infrastructure from project-selected lint, test, SAST and dependency-audit commands.
+- Linked the published *AI Loves Straight Roads* and *Architect of the Future* essays in the bilingual README, architecture and DESIGN manifest documentation.
+
+---
+
 ## [2026.4.0] - 2026-09-24
 
 ### Added

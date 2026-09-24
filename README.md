@@ -19,8 +19,8 @@ This starter kit is the practical implementation of the AI engineering methodolo
 👉 **[Control Ideas, Not Code (AVPDev Blog)](https://avpdev.com/ru/blog/control-ideas-not-code/)**
 
 - **Part 1:** [Control Ideas, Not Code](https://avpdev.com/ru/blog/control-ideas-not-code/) — Shifting from syntax-level coding to architectural control, system invariants, and intent management.
-- **Part 2:** *Automated Verification Gates & Failure Modes* *(Coming soon)*
-- **Part 3:** *The Skeleton + Disposable Modules Architecture: From Theory to Production* *(Coming soon)*
+- **Part 2:** [AI Loves Straight Roads: Why Local Optimization Breaks Complex Systems](https://avpdev.com/ru/blog/ai-loves-straight-roads/) — Why removing architectural fences, queues, and boundaries creates technical debt even when local tests are green.
+- **Part 3:** [Architect of the Future: From Line-by-Line Review to Design Review](https://avpdev.com/ru/blog/architect-of-the-future/) — The `Skeleton + Pluggable Modules` pattern, `DESIGN.md` / Design Review, delegation boundaries, and the architect’s responsibility for system integrity.
 
 ---
 
@@ -40,9 +40,13 @@ agent-starter-kit/
 │   ├── agent-routing.md            # Adaptive agent routing and context containment
 │   ├── project-structure.md        # File hygiene, ownership and project boundaries
 │   ├── verification.md             # Impact, safety and test-coverage policy
+│   ├── verification-profile.example.tsv # Profile template; adapt per project
 │   └── design-manifest-template.md# Zero Vibe Coding pre-project design manifest
 ├── scripts/
-│   └── init-project.sh            # One-click non-destructive setup script
+│   ├── init-project.sh            # One-click non-destructive setup script
+│   ├── verify-project.sh          # Project-local verification profile dispatcher
+│   ├── security-scan.sh           # Dependency-free secret baseline scanner
+│   └── verification-profile.tsv   # This kit's runnable gate; not copied to targets
 ├── CHANGELOG.md                   # Kit version history and releases
 ├── README.md                      # English documentation (this file)
 └── README.ru.md                   # Russian documentation
@@ -73,6 +77,7 @@ Vibe coding must be strictly verified by automated tooling. A task is **never co
 - **TypeScript:** `pnpm typecheck` (`tsc --noEmit`), `pnpm lint`, `pnpm test`
 - **Python:** `ruff check .`, `mypy .`, `pytest`
 - **Go:** `go vet ./...`, `golangci-lint run`, `go test -v ./...`
+- **Project-local profile:** `./scripts/verify-project.sh` runs only commands confirmed during onboarding; `./scripts/security-scan.sh` provides a dependency-free secret baseline.
 *Exit code 0 is mandatory. Every iteration must include unit/integration tests for both happy path and edge cases.*
 
 ### 5. Safe Git / GitHub Sync Protocol
@@ -119,7 +124,7 @@ The script only adds missing files and never overwrites existing project data:
 /path/to/agent-starter-kit/scripts/init-project.sh --update /path/to/your-project
 ```
 
-Then run the onboarding prompt from the protocol. Brownfield projects are scanned automatically; greenfield projects receive only the minimum necessary interview. `--update` is intended only for an existing project and never creates a new target directory.
+Then run the onboarding prompt from the protocol. Brownfield projects are scanned automatically; greenfield projects receive only the minimum necessary interview. The target receives the generic dispatcher, secret scanner and profile template, while the active profile is generated from its manifests. `--update` is intended only for an existing project and never creates a new target directory.
 
 ### Scenario C: Manual or Incremental Update
 

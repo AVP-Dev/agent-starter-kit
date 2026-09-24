@@ -122,17 +122,34 @@ fi
 
 if [ -e "$TARGET_DIR/docs" ] || [ -L "$TARGET_DIR/docs" ]; then
   if [ ! -d "$TARGET_DIR/docs" ]; then
-    printf 'Путь docs существует и не является директорией: %s\n' "$TARGET_DIR/docs" >&2
+    printf 'Путь docs существует и не является диреторией: %s\n' "$TARGET_DIR/docs" >&2
     exit 1
   fi
 fi
 
-for doc in "$STARTER_KIT_DIR/docs/"*.md; do
+if [ -e "$TARGET_DIR/scripts" ] || [ -L "$TARGET_DIR/scripts" ]; then
+  if [ ! -d "$TARGET_DIR/scripts" ]; then
+    printf 'Путь scripts существует и не является диреторией: %s\n' "$TARGET_DIR/scripts" >&2
+    exit 1
+  fi
+fi
+
+for doc in "$STARTER_KIT_DIR/docs/"*; do
   [ -f "$doc" ] || continue
   destination="$TARGET_DIR/docs/$(basename "$doc")"
   if [ -e "$destination" ] || [ -L "$destination" ]; then
     if [ ! -f "$destination" ] && [ ! -L "$destination" ]; then
       printf 'Путь документа существует и не является файлом: %s\n' "$destination" >&2
+      exit 1
+    fi
+  fi
+done
+
+for tool in verify-project.sh security-scan.sh; do
+  destination="$TARGET_DIR/scripts/$tool"
+  if [ -e "$destination" ] || [ -L "$destination" ]; then
+    if [ ! -f "$destination" ] && [ ! -L "$destination" ]; then
+      printf 'Путь инструмента существует и не является файлом: %s\n' "$destination" >&2
       exit 1
     fi
   fi
@@ -198,7 +215,22 @@ fi
 
 copy_if_missing "$STARTER_KIT_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md"
 
-for doc in "$STARTER_KIT_DIR/docs/"*.md; do
+if [ ! -d "$TARGET_DIR/scripts" ]; then
+  if [ "$DRY_RUN" -eq 1 ]; then
+    printf 'Будет создано: scripts/\n'
+  else
+    mkdir -p "$TARGET_DIR/scripts"
+    printf 'Создано: scripts/\n'
+  fi
+else
+  printf 'Сохранено: scripts/\n'
+fi
+
+for tool in verify-project.sh security-scan.sh; do
+  copy_if_missing "$STARTER_KIT_DIR/scripts/$tool" "$TARGET_DIR/scripts/$tool"
+done
+
+for doc in "$STARTER_KIT_DIR/docs/"*; do
   [ -f "$doc" ] || continue
   copy_if_missing "$doc" "$TARGET_DIR/docs/$(basename "$doc")"
 done
@@ -207,5 +239,6 @@ printf '\nПроверьте результат и запустите прото
 printf '  1. Изучите docs/onboarding-protocol.md.\n'
 printf '  2. Для Brownfield просканируйте манифесты, lockfiles, тесты и документацию.\n'
 printf '  3. Для Greenfield ответьте только на вопросы, которые нельзя вывести из файлов.\n'
-printf '  4. Попросите агента заполнить AGENTS.md и показать отчёт перед подтверждением.\n'
+printf '  4. Создайте scripts/verification-profile.tsv на основе docs/verification-profile.example.tsv.\n'
+printf '  5. Попросите агента заполнить AGENTS.md и показать отчёт перед подтверждением.\n'
 printf '\nСуществующие проектные файлы не перезаписываются.\n'

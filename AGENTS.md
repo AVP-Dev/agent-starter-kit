@@ -3,6 +3,7 @@
 > Этот файл — ЕДИНЫЙ ИНДЕКС И СТАНДАРТ РАЗРАБОТКИ (Single Source of Truth).
 > Открытый стандарт `AGENTS.md` (Agentic AI Foundation / Linux Foundation), нативно поддерживаемый всеми современными автономными ИИ-агентами: **Gemini Antigravity**, **Claude Code**, **Cursor**, **Windsurf**, **Roo Code**, **Cline**, **Codex**, **GitHub Copilot**, **Aider**, **OpenCode** и др.
 > Симлинк для Claude Code: `CLAUDE.md -> AGENTS.md`.
+> Методологическая база: [AI loves straight roads](https://avpdev.com/ru/blog/ai-loves-straight-roads/) и [Architect of the Future](https://avpdev.com/ru/blog/architect-of-the-future/).
 
 ---
 
@@ -51,9 +52,13 @@
 │   ├── agent-routing.md            # Адаптивная маршрутизация и контроль контекста
 │   ├── project-structure.md        # Правила структуры, именования и размера файлов
 │   ├── verification.md             # Impact, safety и test coverage policy
+│   ├── verification-profile.example.tsv # Шаблон project-local команд
 │   └── design-manifest-template.md# Шаблон предпроектного манифеста (Zero Vibe Coding)
 ├── tests/                         # Автотесты (юнит-, интеграционные, e2e)
 ├── scripts/                       # Скрипты автоматизации и миграций
+│   ├── verify-project.sh          # Dispatcher project-local verification profile
+│   ├── security-scan.sh           # Dependency-free secret baseline
+│   └── verification-profile.tsv   # Generated project commands; не хранить секреты
 ├── CLAUDE.md                      # Симлинк на AGENTS.md (для Claude Code)
 └── AGENTS.md                      # Единый SSOT правил разработки
 ```
@@ -161,6 +166,7 @@
      golangci-lint run
      go test -v ./...
      ```
+   - **Project-local profile:** если onboarding создал `scripts/verification-profile.tsv`, запускай `./scripts/verify-project.sh`; отсутствующий или невалидный профиль блокирует gate.
 2. **Green-Bar Requirement:** Любая ошибка линтера, типов или тестов должна быть устранена до передачи ответа пользователю.
 3. **Обязательное покрытие тестами каждой итерации:**
    - Любая новая функция/эндпоинт сопровождается юнит- или интеграционным тестом.

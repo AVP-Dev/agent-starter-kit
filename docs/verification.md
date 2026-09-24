@@ -2,7 +2,7 @@
 
 > **Назначение:** определить, что проверять до и после изменения, как обнаруживать риск до правки и когда передавать задачу более глубокой проверке.
 >
-> **Граница:** это политика для агента и проектного checklist, а не универсальный test runner. Команды lint, typecheck, test и security tooling определяются манифестами конкретного проекта.
+> **Граница:** это политика для агента и проектного checklist. Универсальный dispatcher запускает только явно описанные project-local команды; команды lint, typecheck, test и security tooling определяются манифестами конкретного проекта.
 
 ## 1. Что означает coverage в Ките
 
@@ -124,11 +124,50 @@ Probe не должен менять production, реальные платежи
 
 Для Lightweight задачи достаточно трёх строк: цель, инвариант, команда проверки.
 
-## 10. Итоговый checklist
+## 10. Project-local verification profile
+
+Стартер-кит добавляет универсальный dispatcher, но не угадывает команды конкретного проекта. В корне Кита есть собственный `scripts/verification-profile.tsv` для его smoke-gate; он не копируется в целевой проект. После чтения манифестов агент создаёт в целевом проекте отдельный `scripts/verification-profile.tsv` на основе `docs/verification-profile.example.tsv`.
+
+Формат TSV: `name<TAB>layer<TAB>required<TAB>command`.
+
+- `name` — уникальное имя проверки без пробелов;
+- `layer` — `static`, `positive`, `negative`, `security`, `regression`, `integration` или `build`;
+- `required` — `1` для blocking gate или `0` для предупреждения;
+- `command` — команда без табов и секретов, запускаемая из корня проекта.
+
+Dispatcher запускает команды из профиля через `bash -c`, не наследует скрытые аргументы и не меняет права доступа:
+
+```bash
+./scripts/verify-project.sh --list
+./scripts/verify-project.sh --only static,security
+./scripts/verify-project.sh --dry-run
+./scripts/verify-project.sh
+```
+
+Отсутствующий или невалидный профиль завершает dispatcher с кодом `2`, а не считает проверку успешной. Команда из `required=1` завершает gate с кодом `1`; optional-проверка превращается в warning. Команды и их exit code записываются в evidence без полного transcript.
+
+`scripts/security-scan.sh` — dependency-free baseline для tracked и неигнорируемых untracked файлов: private key material, AWS/GCP key patterns, credentialed database URLs, вероятные sensitive assignments и `.env`-файлы. Сканер не печатает найденные значения, только `path:line` и категорию. Он не заменяет SAST, dependency audit, container scan или DAST; утверждённые проектные инструменты добавляются отдельными строками `security` в профиль.
+
+Профиль не должен содержать токены, пароли или приватные ключи. Если команда может раскрыть секрет, она не включается в verification gate до отдельного решения и безопасного способа маскирования.
+
+## 11. Онбординг verification profile
+
+1. Прочитать manifests, lockfiles, CI и существующие scripts.
+2. Выбрать команды, которые уже подтверждены проектом; не устанавливать инструменты молча.
+3. Создать `scripts/verification-profile.tsv` и заполнить примеры для фактического stack.
+4. Добавить baseline secret scan и доступные security checks с явными `required` и failure semantics.
+5. Запустить `./scripts/verify-project.sh --dry-run`, затем полный gate.
+6. Зафиксировать baseline, ограничения окружения и evidence в DESIGN-манифесте и `state.md` целевого проекта.
+
+Если проект не может запустить слой проверки, профиль сохраняет его как `blocked` с причиной; отсутствие команды не превращается в успешный результат.
+
+## 12. Итоговый checklist
 
 - [ ] Проверки определены до изменения.
 - [ ] Есть positive, negative и regression coverage.
 - [ ] Security риски явно рассмотрены.
+- [ ] Создан project-local verification profile с подтверждёнными командами.
+- [ ] Выполнен secret baseline и добавлены доступные SAST/SCA проверки.
 - [ ] Есть safe probe или dry-run, если изменение рискованное.
 - [ ] Известен rollback/stop path.
 - [ ] Контекст проверки ограничен impact surface.
