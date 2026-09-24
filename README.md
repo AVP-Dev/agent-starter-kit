@@ -34,9 +34,10 @@ agent-starter-kit/
 │   ├── onboarding-protocol.md     # ⚡ Automated repository scanning & onboarding protocol
 │   ├── architecture.md            # System architecture (Skeleton + Pluggable Modules)
 │   ├── theme-tokens.md            # 🎨 Semantic design tokens spec & hot-swappable themes
-│   ├── decisions.md               # Architecture Decision Records (ADR-001, ADR-002)
+│   ├── decisions.md               # Architecture Decision Records (ADR registry)
 │   ├── state.md                   # Session ledger (Done / In Progress / Tech Debt)
 │   ├── glossary.md                # Domain terminology glossary
+│   ├── agent-routing.md            # Adaptive agent routing and context containment
 │   └── design-manifest-template.md# Zero Vibe Coding pre-project design manifest
 ├── scripts/
 │   └── init-project.sh            # One-click non-destructive setup script
@@ -83,38 +84,44 @@ git fetch origin && git status -uno
 ### 6. Context7 & Discrepancy Policy
 The agent utilizes Context7 MCP (`resolve-library-id` → `query-docs`) or web search to verify up-to-date SDK signatures and documentation before generating integration code. The agent prompts the user only if critical breaking changes exist; minor backward-compatible updates are adopted seamlessly.
 
+### 7. Adaptive Agent Routing
+The kit uses the existing Delegation Zones 1/2/3 for responsibility and a small topology policy for execution: `single` by default, `fixed-pipeline` for known repeatable work, `side-research` for isolated investigation, `parallel` for genuinely independent work, and `hierarchical` for large decomposable tasks. It does not prescribe models or a runtime orchestrator. See [docs/agent-routing.md](docs/agent-routing.md).
+
 ---
 
 ## ⚡ Automated Onboarding (Zero-Friction Setup)
 
-You **do not need to write project descriptions manually**. The agent inspects your repository and synthesizes all necessary standards following [docs/onboarding-protocol.md](docs/onboarding-protocol.md).
+You **do not need to write project descriptions manually**. The agent inspects your repository and synthesizes the necessary standards following [docs/onboarding-protocol.md](docs/onboarding-protocol.md). The same protocol supports manual completion, automatic brownfield discovery, and greenfield interviewing.
 
 ### Scenario A: Standalone Kit on Your Machine
-You open a new or existing repository (including large monorepos) in your IDE or terminal. Simply prompt your AI agent:
+
+Open a new or existing repository in your IDE or terminal and prompt your agent:
 
 > **Copy & Paste Prompt:**
 > ```text
-> I have an AI engineering standard stored at /path/to/agent-starter-kit (or ~/work/agent-starter-kit).
-> 1. Read the instructions in /path/to/agent-starter-kit/docs/onboarding-protocol.md.
-> 2. Scan this current project (dependencies, lockfiles, existing documentation, build & test scripts).
-> 3. Copy the necessary standards into this repository and auto-populate AGENTS.md with our real stack and verification commands WITHOUT deleting any existing project documentation.
-> 4. Present a summary for my confirmation before finalizing.
+> Read /path/to/agent-starter-kit/docs/onboarding-protocol.md.
+> Inspect the current project, classify it as Brownfield or Greenfield,
+> extract discoverable facts, preserve existing documentation, and prepare
+> the non-destructive onboarding update. Ask only questions that cannot be
+> answered from the repository and present a summary before applying changes.
 > ```
 
----
-
 ### Scenario B: Setup via `init-project.sh`
-1. Run the non-destructive installation script:
-   ```bash
-   /path/to/agent-starter-kit/scripts/init-project.sh /path/to/your-project
-   ```
-   *The script copies ruleslinks `CLAUDE.md`, and creates `docs/` without overwriting pre-existing files.*
-2. Open your project with your AI agent and prompt:
-   > **Copy & Paste Prompt:**
-   > ```text
-   > Execute the onboarding protocol from docs/onboarding-protocol.md:
-   > Scan the repository, detect our actual stack and verification scripts, update AGENTS.md, and present the summary for my confirmation.
-   > ```
+
+The script only adds missing files and never overwrites existing project data:
+
+```bash
+/path/to/agent-starter-kit/scripts/init-project.sh --yes /path/to/new-project
+/path/to/agent-starter-kit/scripts/init-project.sh /path/to/your-project
+/path/to/agent-starter-kit/scripts/init-project.sh --dry-run /path/to/your-project
+/path/to/agent-starter-kit/scripts/init-project.sh --update /path/to/your-project
+```
+
+Then run the onboarding prompt from the protocol. Brownfield projects are scanned automatically; greenfield projects receive only the minimum necessary interview. `--update` is intended only for an existing project and never creates a new target directory.
+
+### Scenario C: Manual or Incremental Update
+
+The agent preserves project-specific sections in `AGENTS.md`, adds only missing standard rules, and reports every preserved or created file. Existing documents, tests, configuration, secrets, and manual values are never silently replaced.
 
 ---
 

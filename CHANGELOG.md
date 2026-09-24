@@ -6,6 +6,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2026.4.0] - 2026-09-24
+
+### Added
+- **Adaptive Agent Routing:** Added `docs/agent-routing.md` with docs-only topology choices (`single`, `fixed-pipeline`, `side-research`, `parallel`, `hierarchical`) while preserving the existing Delegation Zones.
+- **Controlled Handoff Policy:** Added short context packets, side-research isolation, deterministic-first guidance, probe-before-refusal, test-integrity protection, and explicit fallback rules.
+- **Non-Destructive Onboarding Modes:** Extended the onboarding protocol and `init-project.sh` with brownfield/greenfield, manual, incremental-update, and dry-run workflows.
+
+### Changed
+- Reduced model and runtime assumptions in the universal kit; no model routing, orchestration server, or platform-specific adapter is required.
+- Added working hypotheses, topology, stop/escalation conditions, and replay reference to the DESIGN manifest.
+
+### Fixed
+- Made the bootstrap script safe in non-TTY dry-run and CI flows, reject update mode for missing targets, preflight path collisions, detect documentation-only brownfield projects, and fail explicitly if the Claude symlink cannot be created.
+- Documented adaptive reasoning and budget-aware fallback semantics.
+
+---
+
 ## [2026.3.0] - 2026-09-23
 
 ### Added
