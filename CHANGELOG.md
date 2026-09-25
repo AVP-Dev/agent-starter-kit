@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2026.4.3] - 2026-09-25
+
+### Added
+- Added read-only GitHub Actions Verification Gate for push, pull request and manual dispatch runs.
+- Added CI badges and documented the green-gate-to-tag release sequence.
+
+### Changed
+- The public template now documents the CI workflow and preserves the same verification contract locally and in GitHub Actions.
+
+---
+
 ## [2026.4.2] - 2026-09-25
 
 ### Added

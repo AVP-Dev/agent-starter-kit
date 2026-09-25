@@ -45,6 +45,7 @@
 [корень]/
 ├── src/ (или apps/ + packages/)    # Исходный код приложения
 ├── .gitignore                     # Базовый ignore для локальных/секретных артефактов
+├── .github/workflows/verification.yml # CI Verification Gate для push/PR
 ├── docs/                          # Инженерная документация
 │   ├── architecture.md            # Архитектурный каркас (Skeleton + Modules)
 │   ├── theme-tokens.md            # Контракт дизайн-токенов и тем оформления (Zero Hardcoded Colors)
@@ -169,6 +170,7 @@
      go test -v ./...
      ```
    - **Project-local profile:** если onboarding создал `scripts/verification-profile.tsv`, запускай `./scripts/verify-project.sh`; отсутствующий или невалидный профиль блокирует gate.
+   - **GitHub Actions:** `.github/workflows/verification.yml` запускает тот же Gate на push/PR; зелёный CI check является обязательным условием release tag.
 2. **Green-Bar Requirement:** Любая ошибка линтера, типов или тестов должна быть устранена до передачи ответа пользователю.
 3. **Обязательное покрытие тестами каждой итерации:**
    - Любая новая функция/эндпоинт сопровождается юнит- или интеграционным тестом.

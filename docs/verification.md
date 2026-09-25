@@ -163,7 +163,13 @@ Dispatcher запускает команды из профиля через `bas
 
 Если проект не может запустить слой проверки, агент фиксирует его как `blocked` с причиной в DESIGN-манифесте и `state.md`; отсутствующая команда не добавляется в профиль как фиктивная успешная проверка.
 
-## 12. Итоговый checklist
+## 12. CI и release gate
+
+`.github/workflows/verification.yml` запускает тот же project-local Gate на push в `main`, pull request в `main` и ручном запуске. Workflow использует `contents: read`, `pull_request` без trusted-base secrets, checkout без persistent credentials, проверяет Markdown-ссылки и чистоту рабочего дерева.
+
+Release sequence: зелёный Gate → Conventional Commit → push → подтверждённый CI check → annotated tag вида `vYYYY.N.P` → push tag. Непустой или красный Gate блокирует tag; GitHub Release создаётся из уже проверенного tag.
+
+## 13. Итоговый checklist
 
 - [ ] Проверки определены до изменения.
 - [ ] Есть positive, negative и regression coverage.

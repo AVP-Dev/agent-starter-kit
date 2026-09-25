@@ -2,6 +2,8 @@
 
 [English Version](README.md) | **Русская версия**
 
+[![Verification Gate](https://github.com/AVP-Dev/agent-starter-kit/actions/workflows/verification.yml/badge.svg)](https://github.com/AVP-Dev/agent-starter-kit/actions/workflows/verification.yml)
+
 > [!NOTE]
 > **Язык и локализация:** По умолчанию рабочие файлы правил (`AGENTS.md` и документация в `docs/`) составлены на русском языке. При этом стандарт **абсолютно языконезависим**: если вы или ваша команда работаете на английском (или любом другом языке), достаточно отправить агенту одну команду при онбординге:
 > *«Переведи все правила и документацию стартер-кита на английский язык и адаптируй под наш проект»*. Агент сделает это за считанные секунды.
@@ -30,6 +32,7 @@
 agent-starter-kit/
 ├── AGENTS.md                      # Единый SSOT правил разработки, стека и верификации
 ├── .gitignore                     # Базовый ignore для локальных и секретных артефактов
+├── .github/workflows/verification.yml # CI Verification Gate для push/PR
 ├── CLAUDE.md                      # Симлинк на AGENTS.md (для Claude Code)
 ├── docs/                          # Архитектурное ядро документации
 │   ├── onboarding-protocol.md     # ⚡ Автоматический протокол сканирования и онбординга проекта
@@ -68,6 +71,7 @@ agent-starter-kit/
 4. **Automated Verification Gate (Автоматическая верификация):**
    Агент **не считает задачу завершенной**, пока не запустит проверочные команды (`typecheck`, `lint`, `test`) с получением Exit Code 0. Каждая итерация обязана содержать тесты негативных и краевых сценариев.
    * `./scripts/verify-project.sh` запускает только подтверждённые onboarding-команды из локального профиля; `./scripts/security-scan.sh` выполняет dependency-free baseline-поиск секретов.
+   * CI workflow `.github/workflows/verification.yml` запускает тот же Gate на push в `main`, pull request в `main` и ручном запуске; он использует read-only permissions, не сохраняет checkout credentials и проверяет локальные Markdown-ссылки.
 5. **Безопасная синхронизация Git (Safe Remote Sync):**
    Проверка удаленной ветки (`git fetch origin && git status -uno`) перед началом работ. Если локальная ветка отстает — агент **останавливается и предупреждает пользователя** (запрет слепого авто-пулла). Каждая успешная итерация фиксируется атомарным коммитом (Conventional Commits).
 6. **Context7 & Discrepancy Policy:**

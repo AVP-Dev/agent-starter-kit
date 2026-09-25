@@ -1,0 +1,58 @@
+name: Public Template Verification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verification-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  verify:
+    name: Verification Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Run project verification profile
+        run: ./scripts/verify-project.sh
+
+      - name: Check local Markdown links
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          root = Path(".")
+          missing = []
+          pattern = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
+          for path in root.rglob("*.md"):
+              for target in pattern.findall(path.read_text(encoding="utf-8")):
+                  target = target.split("#", 1)[0]
+                  if target and not target.startswith(("http://", "https://", "mailto:", "/")):
+                      if not (path.parent / target).exists():
+                          missing.append(f"{path}:{target}")
+          if missing:
+              print("\n".join(missing), file=sys.stderr)
+              raise SystemExit(1)
+          print("local markdown links: PASS")
+          PY
+
+      - name: Ensure checkout remains clean
+        run: test -z "$(git status --porcelain)"

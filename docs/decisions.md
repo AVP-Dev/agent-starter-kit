@@ -51,6 +51,24 @@
 
 ---
 
+### [2026-09-25] ADR-006: Reproducible CI и tag-based release gate
+**Статус:** Принято
+**Контекст:** Публичный docs-only шаблон должен доказывать одинаковый Verification Gate после push и в чистом clone, а не полагаться на ручной запуск локальных команд. Версии должны быть воспроизводимыми и откатываемыми.
+**Решение:**
+1. Добавить `.github/workflows/verification.yml` для push в `main`, pull request в `main` и ручного запуска.
+2. Использовать `contents: read`, `pull_request` без trusted-base secrets и checkout без сохранения credentials.
+3. Запускать в CI тот же `scripts/verify-project.sh`, затем проверять локальные Markdown-ссылки и чистоту checkout.
+4. Создавать annotated tag `vYYYY.N.P` только после зелёного CI и публиковать Release из проверенного tag.
+**Инварианты:** локальный и CI gate используют один project-local profile; CI не получает лишних permissions; красный или неясный результат блокирует tag; tag не переписывается без явного нового релиза.
+**Альтернативы:** ручной запуск без CI, workflow с `pull_request_target` и секретами, автоматический tag на каждом commit и vendor-specific CI runners отклонены как менее безопасные или менее воспроизводимые.
+**Последствия:**
+(+) Регрессии обнаруживаются до merge и в чистом GitHub checkout.
+(+) Версии можно явно откатить и установить через tag.
+(-) Появляется короткий процесс подготовки релиза и зависимость от доступности GitHub Actions.
+**Условия пересмотра:** изменение состава Gate, необходимость в отдельных deployment jobs или переход на другую CI-платформу.
+
+---
+
 ### [2026-09-25] ADR-005: Project-local verification profile и универсальный dispatcher
 **Статус:** Принято
 **Контекст:** В стартер-кит нельзя встроить один test runner или набор security tools для всех языков и package managers. При этом отсутствие общего способа запуска проверок приводит к пропуску typecheck, lint, regression и security gates.

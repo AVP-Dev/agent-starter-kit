@@ -2,6 +2,8 @@
 
 **English** | [Русская версия](README.ru.md)
 
+[![Verification Gate](https://github.com/AVP-Dev/agent-starter-kit/actions/workflows/verification.yml/badge.svg)](https://github.com/AVP-Dev/agent-starter-kit/actions/workflows/verification.yml)
+
 > [!NOTE]
 > **Language & Localization:** The default core rules (`AGENTS.md` and `docs/`) are written in Russian, as this kit was originally tailored for the Russian-speaking engineering community. However, **it is 100% language-agnostic**. If you work in English or another language, simply instruct your AI agent during onboarding:
 > *"Translate all starter kit rules and docs into English (or your target language) and adapt them to our project."* The agent will handle the translation instantly.
@@ -30,6 +32,7 @@ This starter kit is the practical implementation of the AI engineering methodolo
 agent-starter-kit/
 ├── AGENTS.md                      # Single Source of Truth for rules, stack, and gates
 ├── .gitignore                     # Cross-stack local/secret artifact baseline
+├── .github/workflows/verification.yml # CI Verification Gate for push/PR
 ├── CLAUDE.md                      # Symlink to AGENTS.md (Claude Code compatibility)
 ├── docs/                          # Architectural core documentation
 │   ├── onboarding-protocol.md     # ⚡ Automated repository scanning & onboarding protocol
@@ -80,6 +83,9 @@ Vibe coding must be strictly verified by automated tooling. A task is **never co
 - **Go:** `go vet ./...`, `golangci-lint run`, `go test -v ./...`
 - **Project-local profile:** `./scripts/verify-project.sh` runs only commands confirmed during onboarding; `./scripts/security-scan.sh` provides a dependency-free secret baseline.
 *Exit code 0 is mandatory. Every iteration must include unit/integration tests for both happy path and edge cases.*
+
+### 4.1 GitHub Actions Verification
+The repository-level workflow at `.github/workflows/verification.yml` runs on pushes to `main`, pull requests targeting `main`, and manual dispatch. It uses read-only repository permissions, checks out without persisting credentials, runs the project profile, validates local Markdown links, and fails if verification changes the checkout.
 
 ### 5. Safe Git / GitHub Sync Protocol
 Before starting work on any iteration, the agent checks upstream synchronization:
