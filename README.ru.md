@@ -123,9 +123,5 @@ agent-starter-kit/
 ---
 
 <div align="center">
-  <p>
-    <a href="https://avpdev.com/"><strong>Aliaksei Patskevich (AVPDev)</strong></a><br />
-    <small>AI SOLUTIONS ARCHITECT &bull; <a href="https://github.com/AVP-Dev">GITHUB</a> &bull; <a href="https://t.me/AVP_Dev">TELEGRAM</a></small>
-  </p>
+<sub>AVPdev · Software Development &amp; Automation · <a href="https://avpdev.com/">avpdev.com</a></sub>
 </div>
-
