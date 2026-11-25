@@ -2,15 +2,17 @@
 set -euo pipefail
 
 usage() {
-  printf '%s\n' "Использование: $0 [--dry-run] [--yes] [--update] <путь-к-проекту>" \
+  printf '%s\n' "Использование: $0 [--dry-run] [--yes] [--update] [--with-claude] <путь-к-проекту>" \
     "  --dry-run  показать изменения без их применения" \
     "  --yes      создать отсутствующую директорию без вопроса" \
-    "  --update   обновить существующий проект, добавив только отсутствующие файлы"
+    "  --update   обновить существующий проект, добавив только отсутствующие файлы" \
+    "  --with-claude  добавить CLAUDE.md с импортом AGENTS.md для совместимости"
 }
 
 DRY_RUN=0
 ASSUME_YES=0
 UPDATE_MODE=0
+WITH_CLAUDE=0
 TARGET_DIR=""
 CREATED_PATHS=()
 
@@ -26,6 +28,10 @@ while [ "$#" -gt 0 ]; do
       ;;
     --update)
       UPDATE_MODE=1
+      shift
+      ;;
+    --with-claude)
+      WITH_CLAUDE=1
       shift
       ;;
     --help|-h)
@@ -136,13 +142,6 @@ if [ -e "$TARGET_DIR/AGENTS.md" ] || [ -L "$TARGET_DIR/AGENTS.md" ]; then
   fi
 fi
 
-if [ -e "$TARGET_DIR/CLAUDE.md" ] || [ -L "$TARGET_DIR/CLAUDE.md" ]; then
-  if [ ! -f "$TARGET_DIR/CLAUDE.md" ] && [ ! -L "$TARGET_DIR/CLAUDE.md" ]; then
-    printf 'Путь CLAUDE.md существует и не является файлом: %s\n' "$TARGET_DIR/CLAUDE.md" >&2
-    exit 1
-  fi
-fi
-
 if [ -e "$TARGET_DIR/.gitignore" ] || [ -L "$TARGET_DIR/.gitignore" ]; then
   if [ ! -f "$TARGET_DIR/.gitignore" ] && [ ! -L "$TARGET_DIR/.gitignore" ]; then
     printf 'Путь .gitignore существует и не является файлом: %s\n' "$TARGET_DIR/.gitignore" >&2
@@ -196,8 +195,8 @@ for tool in verify-project.sh security-scan.sh; do
 done
 
 PROJECT_KIND="greenfield"
-for marker in .git .gitignore AGENTS.md CLAUDE.md README.md README.ru.md docs scripts package.json pnpm-lock.yaml yarn.lock bun.lockb pyproject.toml requirements.txt go.mod Cargo.toml Dockerfile Makefile src app lib tests; do
-  if [ -e "$TARGET_DIR/$marker" ]; then
+for marker in AGENTS.md CLAUDE.md docs scripts .github/workflows .gitlab-ci.yml package.json pnpm-lock.yaml package-lock.json yarn.lock bun.lock bun.lockb pyproject.toml requirements.txt go.mod Cargo.toml Dockerfile Makefile src app apps lib packages tests; do
+  if [ -e "$TARGET_DIR/$marker" ] || [ -L "$TARGET_DIR/$marker" ]; then
     PROJECT_KIND="brownfield"
     break
   fi
@@ -227,23 +226,6 @@ copy_if_missing() {
   printf 'Добавлено: %s\n' "$destination_name"
 }
 
-if [ -e "$TARGET_DIR/CLAUDE.md" ] || [ -L "$TARGET_DIR/CLAUDE.md" ]; then
-  if [ -L "$TARGET_DIR/CLAUDE.md" ] && [ "$(readlink "$TARGET_DIR/CLAUDE.md" 2>/dev/null || true)" = "AGENTS.md" ]; then
-    printf 'Сохранено: CLAUDE.md -> AGENTS.md\n'
-  else
-    printf 'Сохранено существующее CLAUDE.md без изменений\n'
-  fi
-elif [ "$DRY_RUN" -eq 1 ]; then
-  printf 'Будет добавлено: CLAUDE.md -> AGENTS.md\n'
-else
-  if ! ln -s AGENTS.md "$TARGET_DIR/CLAUDE.md"; then
-    printf 'Не удалось создать symlink CLAUDE.md -> AGENTS.md. Операция остановлена без копирования файлов.\n' >&2
-    exit 1
-  fi
-  CREATED_PATHS+=("$TARGET_DIR/CLAUDE.md")
-  printf 'Добавлено: CLAUDE.md -> AGENTS.md\n'
-fi
-
 if [ ! -d "$TARGET_DIR/docs" ]; then
   if [ "$DRY_RUN" -eq 1 ]; then
     printf 'Будет создано: docs/\n'
@@ -258,6 +240,18 @@ fi
 
 copy_if_missing "$STARTER_KIT_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md"
 copy_if_missing "$STARTER_KIT_DIR/.gitignore" "$TARGET_DIR/.gitignore"
+
+if [ -e "$TARGET_DIR/CLAUDE.md" ] || [ -L "$TARGET_DIR/CLAUDE.md" ]; then
+  printf 'Сохранено существующее CLAUDE.md без изменений\n'
+elif [ "$WITH_CLAUDE" -eq 1 ]; then
+  if [ "$DRY_RUN" -eq 1 ]; then
+    printf 'Будет добавлено: CLAUDE.md с импортом AGENTS.md\n'
+  else
+    (set -o noclobber; printf '@AGENTS.md\n' >"$TARGET_DIR/CLAUDE.md")
+    CREATED_PATHS+=("$TARGET_DIR/CLAUDE.md")
+    printf 'Добавлено: CLAUDE.md с импортом AGENTS.md\n'
+  fi
+fi
 
 if [ ! -d "$TARGET_DIR/scripts" ]; then
   if [ "$DRY_RUN" -eq 1 ]; then

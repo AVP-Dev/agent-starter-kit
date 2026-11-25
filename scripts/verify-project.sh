@@ -61,8 +61,8 @@ case "$PROFILE_PATH" in
 esac
 
 valid_layer() {
-  case " static positive negative security regression integration build " in
-    *" $1 "*) return 0 ;;
+  case "$1" in
+    static|positive|negative|security|regression|integration|build) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -91,26 +91,36 @@ fi
 
 cd "$PROJECT_ROOT"
 
-found=0
+names=()
+layers=()
+requirements=()
+commands=()
 selected=0
 failures=0
 warnings=0
+required_passed=0
 line_number=0
 
-while IFS=$'\t' read -r name layer required command extra || [ -n "${name:-}${layer:-}${required:-}${command:-}${extra:-}" ]; do
+while IFS= read -r row || [ -n "$row" ]; do
   line_number=$((line_number + 1))
-  name="${name%$'\r'}"
-  layer="${layer%$'\r'}"
-  required="${required%$'\r'}"
-  command="${command%$'\r'}"
-  extra="${extra%$'\r'}"
-
-  [ -n "$name" ] || continue
-  case "$name" in
-    \#*) continue ;;
+  row="${row%$'\r'}"
+  case "$row" in
+    ''|\#*) continue ;;
   esac
 
-  [ -z "$extra" ] || fail "строка $line_number: лишние поля"
+  # Bash read collapses whitespace delimiters, including empty TSV fields.
+  tab=$'\t'
+  case "$row" in
+    *"$tab"*"$tab"*"$tab"*"$tab"*) fail "строка $line_number: лишние поля" ;;
+    *"$tab"*"$tab"*"$tab"*) ;;
+    *) fail "строка $line_number: ожидаются четыре поля" ;;
+  esac
+  name="${row%%"$tab"*}"
+  row="${row#*"$tab"}"
+  layer="${row%%"$tab"*}"
+  row="${row#*"$tab"}"
+  required="${row%%"$tab"*}"
+  command="${row#*"$tab"}"
   [[ "$name" =~ ^[A-Za-z0-9._-]+$ ]] || fail "строка $line_number: недопустимое имя проверки"
   valid_layer "$layer" || fail "строка $line_number: неизвестный слой '$layer'"
   case "$required" in
@@ -122,7 +132,19 @@ while IFS=$'\t' read -r name layer required command extra || [ -n "${name:-}${la
     *";$name;"*) fail "строка $line_number: повторяющееся имя проверки '$name'" ;;
   esac
   seen_names="$seen_names;$name"
-  found=1
+  names+=("$name")
+  layers+=("$layer")
+  requirements+=("$required")
+  commands+=("$command")
+done <"$PROFILE_FILE"
+
+[ "${#names[@]}" -gt 0 ] || fail "профиль не содержит проверок"
+
+for index in "${!names[@]}"; do
+  name="${names[$index]}"
+  layer="${layers[$index]}"
+  required="${requirements[$index]}"
+  command="${commands[$index]}"
 
   if [ "$LIST_ONLY" -eq 1 ]; then
     if selected_layer "$layer"; then
@@ -143,6 +165,9 @@ while IFS=$'\t' read -r name layer required command extra || [ -n "${name:-}${la
   fi
 
   if bash -c "$command"; then
+    if [ "$required" -eq 1 ]; then
+      required_passed=$((required_passed + 1))
+    fi
     printf '[verify] %s: passed\n' "$name"
   else
     status=$?
@@ -154,9 +179,7 @@ while IFS=$'\t' read -r name layer required command extra || [ -n "${name:-}${la
       printf '[verify] %s: warning (exit %s, optional)\n' "$name" "$status" >&2
     fi
   fi
-done <"$PROFILE_FILE"
-
-[ "$found" -eq 1 ] || fail "профиль не содержит проверок"
+done
 
 if [ "$LIST_ONLY" -eq 1 ]; then
   exit 0
@@ -169,4 +192,10 @@ if [ "$failures" -gt 0 ]; then
   exit 1
 fi
 
-printf '[verify] passed: %s required failure(s), %s warning(s)\n' "$failures" "$warnings"
+if [ "$DRY_RUN" -eq 1 ]; then
+  printf '[verify] dry-run: no checks executed\n'
+elif [ "$required_passed" -eq 0 ]; then
+  printf '[verify] no required checks executed, %s warning(s)\n' "$warnings"
+else
+  printf '[verify] passed: %s required check(s), %s warning(s)\n' "$required_passed" "$warnings"
+fi

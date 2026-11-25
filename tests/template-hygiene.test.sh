@@ -8,12 +8,10 @@ fail() {
   exit 1
 }
 
-for path in .gitignore .github/workflows/verification.yml AGENTS.md CLAUDE.md README.md README.ru.md docs/architecture.md docs/theme-tokens.md docs/verification.md scripts/init-project.sh scripts/verify-project.sh scripts/security-scan.sh; do
+for path in .gitignore .github/workflows/verification.yml AGENTS.md README.md README.ru.md docs/architecture.md docs/theme-tokens.md docs/verification.md scripts/init-project.sh scripts/verify-project.sh scripts/security-scan.sh; do
   [ -e "$ROOT/$path" ] || fail "missing required file: $path"
 done
 
-[ -L "$ROOT/CLAUDE.md" ] || fail 'CLAUDE.md is not a symlink'
-[ "$(readlink "$ROOT/CLAUDE.md")" = 'AGENTS.md' ] || fail 'CLAUDE.md points to the wrong file'
 
 workflow="$ROOT/.github/workflows/verification.yml"
 grep -q '^  pull_request:$' "$workflow" || fail 'CI does not run for pull requests'

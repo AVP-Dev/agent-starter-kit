@@ -94,15 +94,24 @@ scan_file() {
   scan_pattern "$file" "sensitive-assignment" "$SENSITIVE_ASSIGNMENT_PATTERN" || return 2
 }
 
+file_list="$(mktemp "${TMPDIR:-/tmp}/starter-scan.XXXXXX")" || exit 2
+trap 'rm -f -- "$file_list"' EXIT
+
 if command -v git >/dev/null 2>&1 && git -C "$PROJECT_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  while IFS= read -r -d '' file; do
-    scan_file "$file" || exit $?
-  done < <(git -C "$PROJECT_ROOT" ls-files -z --cached --others --exclude-standard)
+  if ! git -C "$PROJECT_ROOT" ls-files -z --cached --others --exclude-standard >"$file_list"; then
+    printf 'security-scan: не удалось получить список файлов Git\n' >&2
+    exit 2
+  fi
 else
-  while IFS= read -r -d '' file; do
-    scan_file "$file" || exit $?
-  done < <(find . \( -type d \( -name .git -o -name node_modules -o -name vendor -o -name .venv -o -name venv -o -name dist -o -name build -o -name coverage -o -name .next -o -name target \) -prune \) -o -type f -print0)
+  if ! find . \( -type d \( -name .git -o -name node_modules -o -name vendor -o -name .venv -o -name venv -o -name dist -o -name build -o -name coverage -o -name .next -o -name target \) -prune \) -o -type f -print0 >"$file_list"; then
+    printf 'security-scan: не удалось получить список файлов\n' >&2
+    exit 2
+  fi
 fi
+
+while IFS= read -r -d '' file; do
+  scan_file "$file" || exit $?
+done <"$file_list"
 
 if [ "$findings" -gt 0 ]; then
   printf 'security-scan: найдено %s потенциальных finding(s)\n' "$findings" >&2

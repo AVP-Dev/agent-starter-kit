@@ -72,6 +72,15 @@ printf 'optional\tstatic\t0\texit 9\n' >"$TMP_ROOT/runner/scripts/verification-p
 assert_status 0 "$TMP_ROOT/runner/scripts/verify-project.sh" --only static
 assert_contains "$TMP_ROOT/command-output" 'warning'
 
+assert_contains "$TMP_ROOT/command-output" 'no required checks executed'
+
+printf 'marker\tstatic\t1\ttouch marker\ninvalid\n' >"$TMP_ROOT/runner/scripts/verification-profile.tsv"
+assert_status 2 "$TMP_ROOT/runner/scripts/verify-project.sh"
+[ ! -e "$TMP_ROOT/runner/marker" ] || fail 'Malformed profile executed a command'
+
+printf '\tstatic\t1\ttrue\n' >"$TMP_ROOT/runner/scripts/verification-profile.tsv"
+assert_status 2 "$TMP_ROOT/runner/scripts/verify-project.sh"
+
 printf 'same\tstatic\t1\ttrue\nsame\tstatic\t1\ttrue\n' >"$TMP_ROOT/runner/scripts/verification-profile.tsv"
 assert_status 2 "$TMP_ROOT/runner/scripts/verify-project.sh" --only static
 
@@ -113,6 +122,19 @@ git -C "$TMP_ROOT/security-clean" add -f dist/generated.txt
 assert_status 1 "$TMP_ROOT/security-clean/scripts/security-scan.sh"
 assert_contains "$TMP_ROOT/command-output" 'dist/generated.txt'
 
+mkdir "$TMP_ROOT/failing-git"
+cat >"$TMP_ROOT/failing-git/git" <<'EOF'
+#!/usr/bin/env bash
+case "$3" in
+  rev-parse) exit 0 ;;
+  ls-files) exit 7 ;;
+esac
+exit 1
+EOF
+chmod +x "$TMP_ROOT/failing-git/git"
+assert_status 2 env PATH="$TMP_ROOT/failing-git:$PATH" "$TMP_ROOT/security-clean/scripts/security-scan.sh"
+assert_not_contains "$TMP_ROOT/command-output" 'security-scan: clean'
+
 make_project "$TMP_ROOT/bootstrap"
 "$ROOT/scripts/init-project.sh" --yes "$TMP_ROOT/bootstrap" >"$TMP_ROOT/bootstrap-output" 2>&1
 [ -x "$TMP_ROOT/bootstrap/scripts/verify-project.sh" ] || fail 'verify-project.sh was not copied'
@@ -120,6 +142,7 @@ make_project "$TMP_ROOT/bootstrap"
 [ -f "$TMP_ROOT/bootstrap/docs/verification-profile.example.tsv" ] || fail 'profile example was not copied'
 [ -f "$TMP_ROOT/bootstrap/.gitignore" ] || fail '.gitignore was not copied'
 [ ! -f "$TMP_ROOT/bootstrap/scripts/verification-profile.tsv" ] || fail 'starter-kit profile was copied into target'
+[ ! -e "$TMP_ROOT/bootstrap/.github/workflows/verification.yml" ] || fail 'starter-kit workflow was copied into target'
 git -C "$TMP_ROOT/bootstrap" init -q
 git -C "$TMP_ROOT/bootstrap" check-ignore --no-index -q .env || fail '.env is not ignored'
 git -C "$TMP_ROOT/bootstrap" check-ignore --no-index -q node_modules/example || fail 'node_modules is not ignored'
@@ -129,6 +152,33 @@ mkdir -p "$TMP_ROOT/existing-ignore"
 printf 'custom-project-rule\n' >"$TMP_ROOT/existing-ignore/.gitignore"
 "$ROOT/scripts/init-project.sh" --yes "$TMP_ROOT/existing-ignore" >"$TMP_ROOT/existing-ignore-output" 2>&1
 assert_contains "$TMP_ROOT/existing-ignore/.gitignore" 'custom-project-rule'
+
+mkdir "$TMP_ROOT/greenfield"
+git -C "$TMP_ROOT/greenfield" init -q
+printf '# Fresh repository\n' >"$TMP_ROOT/greenfield/README.md"
+assert_status 0 "$ROOT/scripts/init-project.sh" --dry-run --with-claude "$TMP_ROOT/greenfield"
+assert_contains "$TMP_ROOT/command-output" 'Трек-кандидат: greenfield'
+assert_contains "$TMP_ROOT/command-output" 'CLAUDE.md с импортом AGENTS.md'
+[ ! -e "$TMP_ROOT/greenfield/CLAUDE.md" ] || fail 'Dry-run created CLAUDE.md'
+assert_status 0 "$ROOT/scripts/init-project.sh" "$TMP_ROOT/greenfield"
+[ ! -e "$TMP_ROOT/greenfield/CLAUDE.md" ] && [ ! -L "$TMP_ROOT/greenfield/CLAUDE.md" ] || fail 'Default install added CLAUDE.md'
+assert_status 0 "$ROOT/scripts/init-project.sh" --update --with-claude "$TMP_ROOT/greenfield"
+[ ! -L "$TMP_ROOT/greenfield/CLAUDE.md" ] && [ "$(<"$TMP_ROOT/greenfield/CLAUDE.md")" = '@AGENTS.md' ] || fail 'Wrong Claude adapter'
+
+mkdir -p "$TMP_ROOT/brownfield/docs" "$TMP_ROOT/brownfield/.github/workflows"
+for path in AGENTS.md CLAUDE.md docs/architecture.md .github/workflows/verification.yml; do
+  printf 'existing %s\n' "$path" >"$TMP_ROOT/brownfield/$path"
+done
+assert_status 0 "$ROOT/scripts/init-project.sh" --update --with-claude "$TMP_ROOT/brownfield"
+assert_contains "$TMP_ROOT/command-output" 'Трек-кандидат: brownfield'
+for path in AGENTS.md CLAUDE.md docs/architecture.md .github/workflows/verification.yml; do
+  [ "$(<"$TMP_ROOT/brownfield/$path")" = "existing $path" ] || fail "Modified existing $path"
+done
+
+mkdir "$TMP_ROOT/legacy-claude"
+ln -s AGENTS.md "$TMP_ROOT/legacy-claude/CLAUDE.md"
+assert_status 0 "$ROOT/scripts/init-project.sh" --update --with-claude "$TMP_ROOT/legacy-claude"
+[ -L "$TMP_ROOT/legacy-claude/CLAUDE.md" ] && [ "$(readlink "$TMP_ROOT/legacy-claude/CLAUDE.md")" = AGENTS.md ] || fail 'Modified existing Claude symlink'
 
 DRY_TARGET="$TMP_ROOT/dry-target"
 assert_status 0 "$ROOT/scripts/init-project.sh" --dry-run "$DRY_TARGET"

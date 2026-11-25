@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Changed
+
+- Made file size, report length, routing, and documentation effort proportional to the project and task.
+- Made the Claude Code import opt-in with `--with-claude`. Existing instruction files are preserved.
+
+### Fixed
+
+- Recognize a fresh repository with only Git metadata, an ignore file, or a README as a greenfield candidate.
+- Check Bash syntax separately for each script and validate the complete verification profile before running commands.
+- Report how many required checks passed and surface file-enumeration failures in the secret scanner.
+
 ## [2026.4.3] - 2026-09-25
 
 ### Added

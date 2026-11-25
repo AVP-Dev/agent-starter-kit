@@ -1,4 +1,4 @@
-shell-syntax	static	1	bash -n scripts/init-project.sh scripts/verify-project.sh scripts/security-scan.sh
+shell-syntax	static	1	for script in scripts/init-project.sh scripts/verify-project.sh scripts/security-scan.sh tests/verification-tools.test.sh tests/template-hygiene.test.sh; do bash -n "$script" || exit 1; done
 verification-tools-test	positive	1	bash tests/verification-tools.test.sh
 template-hygiene	positive	1	bash tests/template-hygiene.test.sh
 security-baseline	security	1	./scripts/security-scan.sh
