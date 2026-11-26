@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Detect credential names with compound suffixes; distinguish unquoted environment references from literal credentials without suppressing other findings on the same line.
+
 - Clarify Claude Code instruction precedence and compatibility without hardcoding a minimum version; verify loaded instructions against the official documentation.
 
 - Expand secret baseline coverage for common provider tokens and case-insensitive compound credential assignments; add isolated synthetic regression fixtures and output-redaction checks.
