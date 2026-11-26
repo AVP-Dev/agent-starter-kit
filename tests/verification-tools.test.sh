@@ -142,9 +142,19 @@ check_secret_fixture sensitive-assignment 'API_KEY=' 'synthetic-value-1234567890
 check_secret_fixture sensitive-assignment 'DATABASE_PASSWORD=' 'synthetic-value-1234567890'
 check_secret_fixture sensitive-assignment 'export Client_Secret = "' 'synthetic-value-1234567890"'
 check_secret_fixture sensitive-assignment '"DATABASE_PASSWORD": "' 'synthetic-value-1234567890"'
+check_secret_fixture sensitive-assignment 'SECRET_KEY=' 'synthetic-value-1234567890'
+check_secret_fixture sensitive-assignment 'STRIPE_SECRET_KEY=' 'synthetic-value-1234567890'
+check_secret_fixture sensitive-assignment 'AWS_SECRET_ACCESS_KEY=' 'synthetic-value-1234567890'
+check_secret_fixture sensitive-assignment 'secretKey=' 'synthetic-value-1234567890'
+check_secret_fixture sensitive-assignment 'password = "' 'process.env.PASSWORD_VALUE_FROM_ENV"'
+check_secret_fixture sensitive-assignment 'password = process.env.PASSWORD_VALUE_FROM_ENV; SECRET_KEY=' 'synthetic-value-1234567890'
+check_secret_fixture github-token 'password = process.env.PASSWORD_VALUE_FROM_ENV; value = ghp_' 'ABCDEFGHIJKLMNOPQRSTUV0123456789abcdef'
 
 # A documented variable reference or an incomplete prefix is not a secret.
-printf '%s\n' 'API_KEY=${API_KEY}' 'DATABASE_PASSWORD=' 'ghp_' 'sk-proj-' 'xoxb-' >"$fixture"
+printf '%s\n' 'API_KEY=${API_KEY}' 'DATABASE_PASSWORD=' 'ghp_' 'sk-proj-' 'xoxb-' \
+  'password = process.env.PASSWORD_VALUE_FROM_ENV' \
+  'password = os.environ["DATABASE_PASSWORD"]' \
+  'password = os.environ.get("DATABASE_PASSWORD")' >"$fixture"
 assert_status 0 "$TMP_ROOT/security-patterns/scripts/security-scan.sh"
 
 printf 'password = "%s%s"\n' 'super-' 'secret-value-123456' >"$TMP_ROOT/security-clean/leaked.txt"

@@ -33,7 +33,8 @@ GITHUB_TOKEN_PATTERN='(gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,})'
 ANTHROPIC_TOKEN_PATTERN='sk-ant-[A-Za-z0-9_-]{20,}'
 OPENAI_TOKEN_PATTERN='sk-(proj|svcacct)-[A-Za-z0-9_-]{20,}'
 SLACK_TOKEN_PATTERN='xox[baprs]-[A-Za-z0-9-]{15,}'
-SENSITIVE_ASSIGNMENT_PATTERN="(^|[^[:alnum:]_.-])['\"]?[[:alnum:]_.-]*(password|passwd|secret|api[_-]?key|access[_-]?token|auth[_-]?token|private[_-]?key)['\"]?[[:space:]]*[:=][[:space:]]*['\"]?[A-Za-z0-9_./+=-]{16,}"
+SENSITIVE_ASSIGNMENT_PATTERN="(^|[^[:alnum:]_.-])['\"]?[[:alnum:]_.-]*(password|passwd|secret([_-]?access)?[_-]?key|secret|api[_-]?key|access[_-]?token|auth[_-]?token|private[_-]?key)([_.-][[:alnum:]_.-]+)?['\"]?[[:space:]]*[:=][[:space:]]*['\"]?[A-Za-z0-9_./+=-]{16,}"
+ENV_REFERENCE_PATTERN="[:=][[:space:]]*process[.]env[.][A-Za-z_][A-Za-z0-9_]*$"
 
 findings=0
 
@@ -57,8 +58,13 @@ scan_pattern() {
   if [ "${4:-}" = "ignore-case" ]; then
     options+=(-i)
   fi
+  # Inspect individual assignments, not whole lines: an environment reference
+  # must not suppress another finding in the same line.
+  if [ "$category" = "sensitive-assignment" ]; then
+    options+=(-o)
+  fi
   local status=0
-  local matches
+  local matches match line_number candidate
   matches="$(LC_ALL=C grep "${options[@]}" -- "$pattern" "$file" 2>/dev/null)" || status=$?
   if [ "$status" -gt 1 ]; then
     printf 'security-scan: не удалось прочитать %s\n' "$file" >&2
@@ -68,6 +74,12 @@ scan_pattern() {
     while IFS= read -r match; do
       line_number="${match%%:*}"
       [ -n "$line_number" ] || continue
+      if [ "$category" = "sensitive-assignment" ]; then
+        candidate="${match#*:}"
+        if [[ "$candidate" =~ $ENV_REFERENCE_PATTERN ]]; then
+          continue
+        fi
+      fi
       report "$file" "$line_number" "$category"
     done <<<"$matches"
   fi
