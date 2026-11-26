@@ -69,10 +69,20 @@ printf 'failing\tstatic\t1\texit 7\n' >"$TMP_ROOT/runner/scripts/verification-pr
 assert_status 1 "$TMP_ROOT/runner/scripts/verify-project.sh" --only static
 
 printf 'optional\tstatic\t0\texit 9\n' >"$TMP_ROOT/runner/scripts/verification-profile.tsv"
-assert_status 0 "$TMP_ROOT/runner/scripts/verify-project.sh" --only static
+assert_status 2 "$TMP_ROOT/runner/scripts/verify-project.sh"
+assert_status 2 "$TMP_ROOT/runner/scripts/verify-project.sh" --only static
+assert_status 0 "$TMP_ROOT/runner/scripts/verify-project.sh" --diagnostic --only static
 assert_contains "$TMP_ROOT/command-output" 'warning'
 
 assert_contains "$TMP_ROOT/command-output" 'no required checks executed'
+printf 'optional\tstatic\t0\ttrue\n' >"$TMP_ROOT/runner/scripts/verification-profile.tsv"
+assert_status 2 "$TMP_ROOT/runner/scripts/verify-project.sh"
+assert_status 0 "$TMP_ROOT/runner/scripts/verify-project.sh" --diagnostic
+printf 'required\tstatic\t1\ttrue\noptional\tpositive\t0\ttrue\n' >"$TMP_ROOT/runner/scripts/verification-profile.tsv"
+assert_status 2 "$TMP_ROOT/runner/scripts/verify-project.sh" --only positive
+assert_status 0 "$TMP_ROOT/runner/scripts/verify-project.sh"
+assert_status 0 "$TMP_ROOT/runner/scripts/verify-project.sh" --only static
+assert_contains "$TMP_ROOT/command-output" 'partial/diagnostic'
 
 printf 'marker\tstatic\t1\ttouch marker\ninvalid\n' >"$TMP_ROOT/runner/scripts/verification-profile.tsv"
 assert_status 2 "$TMP_ROOT/runner/scripts/verify-project.sh"
@@ -140,6 +150,7 @@ make_project "$TMP_ROOT/bootstrap"
 [ -x "$TMP_ROOT/bootstrap/scripts/verify-project.sh" ] || fail 'verify-project.sh was not copied'
 [ -x "$TMP_ROOT/bootstrap/scripts/security-scan.sh" ] || fail 'security-scan.sh was not copied'
 [ -f "$TMP_ROOT/bootstrap/docs/verification-profile.example.tsv" ] || fail 'profile example was not copied'
+[ -f "$TMP_ROOT/bootstrap/docs/lifecycle.md" ] || fail 'lifecycle policy was not copied'
 [ -f "$TMP_ROOT/bootstrap/.gitignore" ] || fail '.gitignore was not copied'
 [ ! -f "$TMP_ROOT/bootstrap/scripts/verification-profile.tsv" ] || fail 'starter-kit profile was copied into target'
 [ ! -e "$TMP_ROOT/bootstrap/.github/workflows/verification.yml" ] || fail 'starter-kit workflow was copied into target'

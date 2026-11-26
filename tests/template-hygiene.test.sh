@@ -8,8 +8,12 @@ fail() {
   exit 1
 }
 
-for path in .gitignore .github/workflows/verification.yml AGENTS.md README.md README.ru.md docs/architecture.md docs/theme-tokens.md docs/verification.md scripts/init-project.sh scripts/verify-project.sh scripts/security-scan.sh; do
+for path in .gitignore .github/workflows/verification.yml AGENTS.md README.md README.ru.md docs/architecture.md docs/lifecycle.md docs/theme-tokens.md docs/verification.md scripts/init-project.sh scripts/verify-project.sh scripts/security-scan.sh; do
   [ -e "$ROOT/$path" ] || fail "missing required file: $path"
+done
+
+for zone in 1 2 3; do
+  grep -q "^| Zone $zone |" "$ROOT/AGENTS.md" || fail "missing delegation zone: $zone"
 done
 
 
