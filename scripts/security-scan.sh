@@ -29,7 +29,11 @@ PRIVATE_KEY_PATTERN='-----BEGIN ([A-Z0-9 ]+ )?PRIVATE KEY-----'
 AWS_ACCESS_KEY_PATTERN='AKIA[0-9A-Z]{16}'
 GOOGLE_API_KEY_PATTERN='AIza[0-9A-Za-z_-]{35}'
 DATABASE_URL_PATTERN='(postgres(ql)?|mysql|mongodb(\+srv)?|redis)://[^[:space:]]+:[^[:space:]@]+@'
-SENSITIVE_ASSIGNMENT_PATTERN="(password|passwd|secret|api[_-]?key|access[_-]?token|auth[_-]?token|private[_-]?key)[[:space:]]*[:=][[:space:]]*['\"]?[A-Za-z0-9_./+=-]{16,}"
+GITHUB_TOKEN_PATTERN='(gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,})'
+ANTHROPIC_TOKEN_PATTERN='sk-ant-[A-Za-z0-9_-]{20,}'
+OPENAI_TOKEN_PATTERN='sk-(proj|svcacct)-[A-Za-z0-9_-]{20,}'
+SLACK_TOKEN_PATTERN='xox[baprs]-[A-Za-z0-9-]{15,}'
+SENSITIVE_ASSIGNMENT_PATTERN="(^|[^[:alnum:]_.-])['\"]?[[:alnum:]_.-]*(password|passwd|secret|api[_-]?key|access[_-]?token|auth[_-]?token|private[_-]?key)['\"]?[[:space:]]*[:=][[:space:]]*['\"]?[A-Za-z0-9_./+=-]{16,}"
 
 findings=0
 
@@ -49,9 +53,13 @@ scan_pattern() {
   local file="$1"
   local category="$2"
   local pattern="$3"
+  local -a options=(-nE -I)
+  if [ "${4:-}" = "ignore-case" ]; then
+    options+=(-i)
+  fi
   local status=0
   local matches
-  matches="$(LC_ALL=C grep -nE -I -- "$pattern" "$file" 2>/dev/null)" || status=$?
+  matches="$(LC_ALL=C grep "${options[@]}" -- "$pattern" "$file" 2>/dev/null)" || status=$?
   if [ "$status" -gt 1 ]; then
     printf 'security-scan: не удалось прочитать %s\n' "$file" >&2
     return 2
@@ -91,7 +99,11 @@ scan_file() {
   scan_pattern "$file" "aws-access-key" "$AWS_ACCESS_KEY_PATTERN" || return 2
   scan_pattern "$file" "google-api-key" "$GOOGLE_API_KEY_PATTERN" || return 2
   scan_pattern "$file" "credentialed-database-url" "$DATABASE_URL_PATTERN" || return 2
-  scan_pattern "$file" "sensitive-assignment" "$SENSITIVE_ASSIGNMENT_PATTERN" || return 2
+  scan_pattern "$file" "github-token" "$GITHUB_TOKEN_PATTERN" || return 2
+  scan_pattern "$file" "anthropic-token" "$ANTHROPIC_TOKEN_PATTERN" || return 2
+  scan_pattern "$file" "openai-token" "$OPENAI_TOKEN_PATTERN" || return 2
+  scan_pattern "$file" "slack-token" "$SLACK_TOKEN_PATTERN" || return 2
+  scan_pattern "$file" "sensitive-assignment" "$SENSITIVE_ASSIGNMENT_PATTERN" ignore-case || return 2
 }
 
 file_list="$(mktemp "${TMPDIR:-/tmp}/starter-scan.XXXXXX")" || exit 2
