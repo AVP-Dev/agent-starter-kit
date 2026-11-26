@@ -39,8 +39,9 @@ agent-starter-kit/
 │   ├── agent-routing.md            # Adaptive agent routing and context containment
 │   ├── project-structure.md        # File hygiene, ownership and project boundaries
 │   ├── verification.md             # Impact, safety and test-coverage policy
+│   ├── lifecycle.md                # Application evolution and operational stages
 │   ├── verification-profile.example.tsv # Profile template; adapt per project
-│   └── design-manifest-template.md# Zero Vibe Coding pre-project design manifest
+│   └── design-manifest-template.md # Zero Vibe Coding design and evolution manifest
 ├── scripts/
 │   ├── init-project.sh            # One-click non-destructive setup script
 │   ├── verify-project.sh          # Project-local verification profile dispatcher
@@ -58,6 +59,7 @@ agent-starter-kit/
 - **Apply project conventions.** Preserve existing architecture and practices. Consider [Skeleton + Pluggable Modules](docs/architecture.md) when its boundaries fit. Use the existing design system for UI changes.
 - **Match design work to the risk.** For a local change, capture the goal, invariant, and check. Use relevant parts of the [DESIGN manifest](docs/design-manifest-template.md) for contract changes or complex failures. Get confirmation before changing data ownership, access rights, security contracts, or taking an irreversible action.
 - **Verify what changed.** Run checks for the affected behavior and compare with the starting state. Report new regressions, existing failures, and checks blocked by the environment. [Verification guide](docs/verification.md)
+- **Evolve safely.** Apply [lifecycle requirements](docs/lifecycle.md) to the affected operational risk, preserve stable contracts, and keep migration, recovery and deprecation explicit. Full acceptance requires at least one mandatory check and all mandatory checks to pass; diagnostic runs are not acceptance.
 - **Keep Git operations explicit.** Check remote state when integration depends on it. Local analysis can continue if the remote is unavailable. Follow the project’s commit process, stage explicit paths, and avoid a blind pull.
 - **Check version-specific documentation.** Use Context7 or official documentation for the installed dependency version. Get approval if the requested work requires a breaking migration.
 - **Organize work around the task.** Delegate independent work when it helps. Save a checkpoint at a meaningful milestone, handoff, or pause. Treat line counts and report length as guidance. [Agent routing](docs/agent-routing.md) · [Project structure](docs/project-structure.md)

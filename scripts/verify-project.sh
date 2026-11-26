@@ -2,11 +2,12 @@
 set -euo pipefail
 
 usage() {
-  printf '%s\n' "Использование: $0 [--profile PATH] [--only LAYER[,LAYER...]] [--list] [--dry-run]" \
+  printf '%s\n' "Использование: $0 [--profile PATH] [--only LAYER[,LAYER...]] [--list] [--dry-run] [--diagnostic]" \
     "  --profile PATH  профиль команд относительно корня проекта" \
     "  --only LAYERS   запустить только указанные слои" \
     "  --list          показать профиль без запуска" \
-    "  --dry-run       показать выбранные проверки без запуска"
+    "  --dry-run       показать выбранные проверки без запуска" \
+    "  --diagnostic    разрешить запуск без обязательных проверок (не Acceptance Gate)"
 }
 
 fail() {
@@ -18,6 +19,7 @@ PROFILE_PATH="scripts/verification-profile.tsv"
 ONLY=""
 LIST_ONLY=0
 DRY_RUN=0
+DIAGNOSTIC=0
 seen_names=""
 
 while [ "$#" -gt 0 ]; do
@@ -38,6 +40,10 @@ while [ "$#" -gt 0 ]; do
       ;;
     --dry-run)
       DRY_RUN=1
+      shift
+      ;;
+    --diagnostic)
+      DIAGNOSTIC=1
       shift
       ;;
     --help|-h)
@@ -140,6 +146,16 @@ done <"$PROFILE_FILE"
 
 [ "${#names[@]}" -gt 0 ] || fail "профиль не содержит проверок"
 
+if [ "$LIST_ONLY" -eq 0 ] && [ "$DRY_RUN" -eq 0 ] && [ "$DIAGNOSTIC" -eq 0 ]; then
+  selected_required=0
+  for index in "${!names[@]}"; do
+    if selected_layer "${layers[$index]}" && [ "${requirements[$index]}" -eq 1 ]; then
+      selected_required=$((selected_required + 1))
+    fi
+  done
+  [ "$selected_required" -gt 0 ] || fail "Acceptance Gate требует хотя бы одну обязательную проверку"
+fi
+
 for index in "${!names[@]}"; do
   name="${names[$index]}"
   layer="${layers[$index]}"
@@ -195,7 +211,9 @@ fi
 if [ "$DRY_RUN" -eq 1 ]; then
   printf '[verify] dry-run: no checks executed\n'
 elif [ "$required_passed" -eq 0 ]; then
-  printf '[verify] no required checks executed, %s warning(s)\n' "$warnings"
+  printf '[verify] diagnostic: no required checks executed, %s warning(s)\n' "$warnings"
+elif [ "$DIAGNOSTIC" -eq 1 ] || [ -n "$ONLY" ]; then
+  printf '[verify] partial/diagnostic: %s required check(s) passed, %s warning(s)\n' "$required_passed" "$warnings"
 else
   printf '[verify] passed: %s required check(s), %s warning(s)\n' "$required_passed" "$warnings"
 fi

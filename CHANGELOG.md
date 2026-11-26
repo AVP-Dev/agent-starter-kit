@@ -8,12 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Application lifecycle policy for stable contracts, operational stages, migrations, recovery, technical debt and deprecation.
+- Design evolution, runtime limits and bounded agent work budgets.
+
 ### Changed
 
 - Made file size, report length, routing, and documentation effort proportional to the project and task.
 - Made the Claude Code import opt-in with `--with-claude`. Existing instruction files are preserved.
 
 ### Fixed
+
+- Restored Delegation Zones and aligned design requirements with ADR-007.
+- Reject verification runs without mandatory checks unless explicitly diagnostic; distinguish partial and diagnostic runs from full acceptance.
 
 - Recognize a fresh repository with only Git metadata, an ignore file, or a README as a greenfield candidate.
 - Check Bash syntax separately for each script and validate the complete verification profile before running commands.

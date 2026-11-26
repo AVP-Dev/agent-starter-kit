@@ -1,6 +1,8 @@
 # name	layer	required	command
 # Uncomment and adapt rows after inspecting the project manifests.
 # Do not put credentials, tokens, or private data in this file.
+# A full Acceptance Gate requires at least one required=1 check.
+# Choose checks that cover the project's accepted invariants.
 # typecheck	static	1	pnpm typecheck
 # lint	static	1	pnpm lint
 # test	positive	1	pnpm test
