@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Clarify Claude Code instruction precedence and compatibility without hardcoding a minimum version; verify loaded instructions against the official documentation.
+
+- Expand secret baseline coverage for common provider tokens and case-insensitive compound credential assignments; add isolated synthetic regression fixtures and output-redaction checks.
+
 - Restored Delegation Zones and aligned design requirements with ADR-007.
 - Reject verification runs without mandatory checks unless explicitly diagnostic; distinguish partial and diagnostic runs from full acceptance.
 

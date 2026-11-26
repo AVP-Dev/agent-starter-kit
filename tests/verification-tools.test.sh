@@ -40,7 +40,7 @@ assert_not_contains() {
   text="$2"
   contents="$(<"$file")"
   case "$contents" in
-    *"$text"*) fail "Did not expect '$text' in $file" ;;
+    *"$text"*) fail "Unexpected content in $file" ;;
   esac
 }
 
@@ -112,6 +112,40 @@ printf 'safe documentation\n' >"$TMP_ROOT/security-clean/README.md"
 printf 'security-baseline\tsecurity\t1\t./scripts/security-scan.sh\n' >"$TMP_ROOT/security-clean/scripts/verification-profile.tsv"
 assert_status 0 "$TMP_ROOT/security-clean/scripts/verify-project.sh" --only security
 assert_status 0 "$TMP_ROOT/security-clean/scripts/security-scan.sh"
+
+# Isolate each synthetic fixture so another finding cannot hide a missed match.
+make_project "$TMP_ROOT/security-patterns"
+git -C "$TMP_ROOT/security-patterns" init -q
+fixture="$TMP_ROOT/security-patterns/fixture.txt"
+
+check_secret_fixture() {
+  local category="$1"
+  local prefix="$2"
+  local payload="$3"
+  local sample="$prefix$payload"
+  printf '%s\n' "$sample" >"$fixture"
+  assert_status 1 "$TMP_ROOT/security-patterns/scripts/security-scan.sh"
+  assert_contains "$TMP_ROOT/command-output" "fixture.txt:1 $category"
+  assert_not_contains "$TMP_ROOT/command-output" "$payload"
+  : >"$fixture"
+  assert_status 0 "$TMP_ROOT/security-patterns/scripts/security-scan.sh"
+}
+
+# Construct fake samples from fragments; never commit real credentials.
+check_secret_fixture github-token 'ghp_' 'ABCDEFGHIJKLMNOPQRSTUV0123456789abcdef'
+check_secret_fixture github-token 'github_pat_' 'ABCDEFGHIJKLMNOPQRSTUV0123456789abcdef'
+check_secret_fixture anthropic-token 'sk-ant-' 'ABCDEFGHIJKLMNOPQRSTUV0123456789abcdef'
+check_secret_fixture openai-token 'sk-proj-' 'ABCDEFGHIJKLMNOPQRSTUV0123456789abcdef'
+check_secret_fixture openai-token 'sk-svcacct-' 'ABCDEFGHIJKLMNOPQRSTUV0123456789abcdef'
+check_secret_fixture slack-token 'xoxb-' '123456789012-123456789012-synthetic'
+check_secret_fixture sensitive-assignment 'API_KEY=' 'synthetic-value-1234567890'
+check_secret_fixture sensitive-assignment 'DATABASE_PASSWORD=' 'synthetic-value-1234567890'
+check_secret_fixture sensitive-assignment 'export Client_Secret = "' 'synthetic-value-1234567890"'
+check_secret_fixture sensitive-assignment '"DATABASE_PASSWORD": "' 'synthetic-value-1234567890"'
+
+# A documented variable reference or an incomplete prefix is not a secret.
+printf '%s\n' 'API_KEY=${API_KEY}' 'DATABASE_PASSWORD=' 'ghp_' 'sk-proj-' 'xoxb-' >"$fixture"
+assert_status 0 "$TMP_ROOT/security-patterns/scripts/security-scan.sh"
 
 printf 'password = "%s%s"\n' 'super-' 'secret-value-123456' >"$TMP_ROOT/security-clean/leaked.txt"
 assert_status 1 "$TMP_ROOT/security-clean/scripts/security-scan.sh"

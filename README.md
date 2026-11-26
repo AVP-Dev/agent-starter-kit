@@ -7,7 +7,7 @@
 The starter kit helps adapt engineering guidance and automated checks to new and existing projects. The templates are written in Russian and can be localized during onboarding.
 
 - [AGENTS.md](https://agents.md/) is the primary instruction file. Loading and precedence depend on the client and settings.
-- Claude Code v2.1.277 and later supports direct loading. For configurations that require `CLAUDE.md`, install the optional `@AGENTS.md` import with `--with-claude`. [Claude Code documentation](https://code.claude.com/docs/en/memory#agentsmd)
+- Claude Code can load `AGENTS.md` directly when supported by the installed version and instruction settings. By default, an existing `CLAUDE.md` or `CLAUDE.local.md` in the working directory or above takes precedence. Use `--with-claude` to add a missing `CLAUDE.md` with `@AGENTS.md`; if one already exists, preserve its content and add the import only when needed. Verify loaded instructions against the [Claude Code documentation](https://code.claude.com/docs/en/memory#agentsmd).
 
 ---
 
