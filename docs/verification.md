@@ -1,125 +1,125 @@
-# Verification, Safety и Impact Policy
+# Verification, Safety, and Impact Policy
 
-> **Назначение:** определить, что проверять до и после изменения, как обнаруживать риск до правки и когда передавать задачу более глубокой проверке.
+> **Purpose:** Define what to verify before and after a change, how to identify risk before editing, and when to escalate a task for deeper verification.
 >
-> **Граница:** это политика для агента и проектного checklist. Универсальный dispatcher запускает только явно описанные project-local команды; команды lint, typecheck, test и security tooling определяются манифестами конкретного проекта.
+> **Boundary:** This is a policy for the agent and a project checklist. The universal dispatcher runs only explicitly defined project-local commands; lint, typecheck, test, and security tooling commands are determined by the specific project's manifests.
 
-## 1. Что означает coverage в Ките
+## 1. What Coverage Means in the Kit
 
-Критичные инварианты связывай с проверяемым evidence: например, import-boundary checks для границ модулей, contract tests для API, constraints и transaction tests для целостности, integration tests для изоляции, migration smoke tests для схем. Автоматизируемые красные линии должны иметь обязательные проверки; если автоматизация невозможна, укажи явную процедуру ручной проверки и результат. Отсутствие evidence не считается успешной проверкой. Не меняй required=1 на required=0 ради прохождения gate.
+Link critical invariants to verifiable evidence: for example, import-boundary checks for module boundaries, contract tests for APIs, constraints and transaction tests for integrity, integration tests for isolation, and migration smoke tests for schemas. Automatable red lines must have required checks; if automation is impossible, specify an explicit manual verification procedure and its result. Lack of evidence does not count as a successful check. Do not change required=1 to required=0 to pass a gate.
 
-Coverage — это не только процент строк. Для каждого изменения фиксируется, какие уровни проверки покрыты:
+Coverage is more than the percentage of lines. For each change, record which verification layers are covered:
 
-- **Static:** types, schemas, imports, formatting и dependency boundaries.
-- **Positive:** основной успешный сценарий.
-- **Negative:** невалидные входы, границы, отказ сервиса, timeout, duplicate и partial failure.
-- **Security:** auth, permissions, tenant isolation, secrets, untrusted input и безопасная обработка внешних данных.
-- **Regression:** существующие тесты и пользовательские инварианты, которые нельзя сломать.
-- **Integration:** контракты, БД, очереди, API, workers и внешние адаптеры.
-- **Acceptance:** конкретные acceptance invariants из DESIGN-манифеста.
+- **Static:** Types, schemas, imports, formatting, and dependency boundaries.
+- **Positive:** The main successful scenario.
+- **Negative:** Invalid inputs, boundaries, service failure, timeout, duplicates, and partial failure.
+- **Security:** Auth, permissions, tenant isolation, secrets, untrusted input, and safe handling of external data.
+- **Regression:** Existing tests and user invariants that must not be broken.
+- **Integration:** Contracts, databases, queues, APIs, workers, and external adapters.
+- **Acceptance:** Specific acceptance invariants from the DESIGN manifest.
 
 ## 2. Pre-change Impact Gate
 
-Перед изменением оцени его влияние. Для локальной правки достаточно посмотреть затронутый код или документ и выбрать проверку. Для рискованной работы используй применимые шаги:
+Assess the impact before making a change. For a local change, reviewing the affected code or document and selecting a check is sufficient. For risky work, use the applicable steps:
 
-1. Перечислить затронутые файлы, модули, контракты и потребителей.
-2. Прочитать текущие инварианты и существующие тесты рядом с изменением.
-3. Определить, может ли изменение повлиять на auth, data, API, queues, UI, migrations или external integrations.
-4. Зафиксировать baseline: какие проверки проходят до изменения.
-5. Определить rollback или безопасный revert для изменения.
-6. Сформулировать negative и security-сценарии до написания решения.
-7. Уточнить область и риск локальной проверкой. Запросить решение, если остаётся существенная развилка в контракте, правах или последствиях.
+1. List affected files, modules, contracts, and consumers.
+2. Read the current invariants and existing tests near the change.
+3. Determine whether the change may affect auth, data, APIs, queues, UI, migrations, or external integrations.
+4. Record the baseline: which checks pass before the change.
+5. Define the rollback or safe revert for the change.
+6. Define negative and security scenarios before implementing the solution.
+7. Clarify scope and risk using local verification. Request a decision if a material choice remains regarding contracts, permissions, or consequences.
 
-Impact-check не должен превращаться в чтение всего репозитория. Он ограничен изменяемым dependency surface и зоной риска.
+The impact check must not turn into a review of the entire repository. It is limited to the affected dependency surface and risk area.
 
-## 3. Что проверять по классу задачи
+## 3. What to Verify by Task Class
 
-| Scope | Релевантные проверки |
+| Scope | Relevant Checks |
 |---|---|
-| Документация | ссылки и соответствие описания фактическому поведению |
-| Zone 1, чистая функция или локальный UI | positive, boundary/negative, regression |
+| Documentation | Links and consistency between the description and actual behavior |
+| Zone 1, pure function or local UI | positive, boundary/negative, regression |
 | Zone 1, parser/DTO/validator | positive, malformed input, boundary, regression |
 | Zone 2, endpoint/worker/integration | positive, negative, security, integration, idempotency |
-| Изменение shared contract | все затронутые consumers, schema compatibility, regression |
-| Изменение UI | positive, negative states, keyboard/a11y, responsive regression |
-| Zone 3 или необратимое действие | human Confirmation Gate, security, rollback/stop plan, post-action evidence |
+| Shared contract change | all affected consumers, schema compatibility, regression |
+| UI change | positive, negative states, keyboard/a11y, responsive regression |
+| Zone 3 or irreversible action | human Confirmation Gate, security, rollback/stop plan, post-action evidence |
 
-Сравни результаты с baseline. Исправь новые регрессии в рамках задачи. Укажи исходные падения, недоступные проверки и причину. Добавляй тесты, когда они нужны для изменённого поведения, регрессии или выполнения проектного требования.
+Compare results against the baseline. Fix new regressions within the task's scope. Report baseline failures, unavailable checks, and their reasons. Add tests when needed for changed behavior, regression prevention, or meeting a project requirement.
 
-## 4. Negative и security scenarios
+## 4. Negative and Security Scenarios
 
-Базовый список для анализа изменений:
+A baseline list for analyzing changes:
 
-- пустой, `null`, неверный тип и boundary value;
-- malformed JSON, schema mismatch и неожиданный формат;
-- duplicate request, retry, race и конкурентная запись;
-- timeout, network failure, partial response и недоступный dependency;
-- stale cache, stale artifact и конфликт версий;
-- недостаточная роль, чужой tenant/project и доступ к чужому ресурсу;
-- untrusted document, prompt injection и вредоносный внешний input;
-- secret в логах, error message, артефакте или checkpoint;
-- rollback после неудачной миграции или необратимой операции.
+- Empty input, `null`, incorrect type, and boundary values;
+- Malformed JSON, schema mismatch, and unexpected format;
+- Duplicate requests, retries, races, and concurrent writes;
+- Timeout, network failure, partial response, and unavailable dependencies;
+- Stale cache, stale artifacts, and version conflicts;
+- Insufficient role, another tenant/project, and access to another owner's resource;
+- Untrusted documents, prompt injection, and malicious external input;
+- Secrets in logs, error messages, artifacts, or checkpoints;
+- Rollback after a failed migration or irreversible operation.
 
-Проверка должна доказывать инвариант, а не только отсутствие исключения.
+A check must demonstrate the invariant, not just the absence of an exception.
 
-## 5. Безопасная симуляция до изменения
+## 5. Safe Simulation Before a Change
 
-Если изменение трудно проверить напрямую, сначала используется минимальный безопасный probe:
+If a change is difficult to verify directly, use a minimal safe probe first:
 
-- schema validation на синтетическом payload;
-- dry-run или plan без записи;
-- контрактный тест с mock/fake dependency;
-- проверка на временной fixture или изолированной базе;
-- reverse-diff и impact analysis;
-- проверка rollback-команды без её выполнения.
+- Schema validation with a synthetic payload;
+- Dry-run or plan without writes;
+- Contract test with a mock/fake dependency;
+- Verification on a temporary fixture or isolated database;
+- Reverse diff and impact analysis;
+- Verification of the rollback command without executing it.
 
-Probe не должен менять production, реальные платежи, права доступа или пользовательские данные. Если безопасный probe невозможен, требуется human approval или split task.
+A probe must not change production, real payments, access permissions, or user data. If a safe probe is impossible, human approval or a task split is required.
 
-## 6. Контекст и budget проверки
+## 6. Verification Context and Budget
 
-Агент сначала выполняет детерминированные и локальные проверки, затем точечно расширяет контекст:
+The agent runs deterministic and local checks first, then expands the context selectively:
 
-1. Сначала проверить изменённый scope.
-2. Затем проверить непосредственных consumers.
-3. Затем запустить связанные integration/regression tests.
-4. Только при подтверждённом impact переходить к широкому сканированию.
+1. Verify the changed scope first.
+2. Verify direct consumers next.
+3. Run relevant integration/regression tests next.
+4. Proceed to broader scanning only when impact is confirmed.
 
-Ограничивай чтение областью проверки. Повторяй попытку при новых данных, временном сбое или другом подходе. Если рабочий бюджет исчерпан, измени формат или отдай подтверждённый результат с указанием оставшегося пробела. Жёсткий согласованный лимит или ограничение среды останавливает затронутую операцию.
+Limit reading to the verification scope. Retry when there is new information, a temporary failure, or a different approach. If the working budget is exhausted, change the format or deliver the confirmed result while identifying the remaining gap. A hard agreed limit or environment constraint stops the affected operation.
 
-Длина отчёта, комментария и diff служит ориентиром. Сохраняй существенные выводы и доказательства. Если площадка ограничивает комментарий, помести в него итог и ссылку на подробный отчёт либо разбей ответ на части, если формат это допускает.
+Report, comment, and diff length are guidelines. Preserve material findings and evidence. If the platform limits comment length, include the conclusion and a link to the full report, or split the response into parts if the format permits.
 
-## 7. Когда нужна более глубокая проверка
+## 7. When Deeper Verification Is Needed
 
-Повысить глубину проверки нужно, если:
+Increase verification depth if:
 
-- гипотеза не подтверждена;
-- найдено противоречие между документами и кодом;
-- меняется shared contract или Skeleton;
-- затрагиваются auth, permissions, tenant isolation или data ownership;
-- есть concurrency, retry, partial failure или rollback;
-- тест неожиданно проходит или неожиданно падает;
-- агент не может объяснить, почему изменение безопасно;
-- результат worker-а не проходит независимую проверку.
+- A hypothesis is not confirmed;
+- A discrepancy between documentation and code is found;
+- A shared contract or Skeleton changes;
+- Auth, permissions, tenant isolation, or data ownership are affected;
+- Concurrency, retries, partial failure, or rollback are involved;
+- A test unexpectedly passes or fails;
+- The agent cannot explain why the change is safe;
+- A worker's result fails independent verification.
 
-Действия: targeted probe, side-research, независимый reviewer, повышение reasoning, обновление DESIGN-манифеста или human gate. Нельзя просто повторять тот же цикл.
+Actions: targeted probe, side research, independent reviewer, increased reasoning, DESIGN manifest update, or human gate. Do not simply repeat the same cycle.
 
-## 8. Evidence и результат
+## 8. Evidence and Results
 
-Кратко укажи, что проверено, с каким результатом и что осталось. Для важных проверок пригодятся следующие сведения:
+Briefly state what was verified, the result, and what remains. For important checks, the following information is useful:
 
-- command или проверка;
-- scope и commit/revision;
-- результат `passed`, `failed` или `blocked`;
-- negative/security сценарии;
-- ссылка на evidence;
-- причина failure и следующий шаг;
-- для нетривиальной работы — `Measured outcome` с 1–2 метриками.
+- Command or check;
+- Scope and commit/revision;
+- Result: `passed`, `failed`, or `blocked`;
+- Negative/security scenarios;
+- Link to evidence;
+- Reason for failure and next step;
+- For non-trivial work, `Measured outcome` with 1–2 metrics.
 
-В `state.md` и task ledger хранится ссылка на результат, а не полный transcript тестового процесса.
+In `state.md` and the task ledger, keep a link to the result rather than the full test process transcript.
 
-## 9. Что фиксируется в DESIGN-манифесте
+## 9. What to Record in the DESIGN Manifest
 
-Для задачи со значимым риском выбери применимые поля:
+For a task with meaningful risk, choose applicable fields:
 
 - `Pre-change impact check`;
 - `Verification layers`;
@@ -127,20 +127,20 @@ Probe не должен менять production, реальные платежи
 - `Context budget / escalation trigger`;
 - `Measured outcome`.
 
-Для Lightweight задачи достаточно трёх строк: цель, инвариант, команда проверки.
+For a Lightweight task, three lines are enough: the goal, invariant, and verification command.
 
-## 10. Project-local verification profile
+## 10. Project-local Verification Profile
 
-Стартер-кит добавляет универсальный dispatcher, но не угадывает команды конкретного проекта. В корне Кита есть собственный `scripts/verification-profile.tsv` для его smoke-gate; он не копируется в целевой проект. После чтения манифестов агент создаёт в целевом проекте отдельный `scripts/verification-profile.tsv` на основе `docs/verification-profile.example.tsv`.
+The starter kit provides a universal dispatcher but does not guess the commands for a specific project. The Kit root has its own `scripts/verification-profile.tsv` for its smoke gate; it is not copied to the target project. After reading the manifests, the agent creates a separate `scripts/verification-profile.tsv` in the target project based on `docs/verification-profile.example.tsv`.
 
-Формат TSV: `name<TAB>layer<TAB>required<TAB>command`.
+TSV format: `name<TAB>layer<TAB>required<TAB>command`.
 
-- `name` — уникальное имя проверки без пробелов;
-- `layer` — `static`, `positive`, `negative`, `security`, `regression`, `integration` или `build`;
-- `required` — `1` для blocking gate или `0` для предупреждения;
-- `command` — команда без табов и секретов, запускаемая из корня проекта.
+- `name` — a unique check name without spaces;
+- `layer` — `static`, `positive`, `negative`, `security`, `regression`, `integration`, or `build`;
+- `required` — `1` for a blocking gate or `0` for a warning;
+- `command` — a command without tabs or secrets, run from the project root.
 
-Dispatcher запускает команды из профиля через `bash -c`, не наследует скрытые аргументы и не меняет права доступа:
+The dispatcher runs commands from the profile through `bash -c`, does not inherit hidden arguments, and does not change access permissions:
 
 ```bash
 ./scripts/verify-project.sh --list
@@ -149,45 +149,45 @@ Dispatcher запускает команды из профиля через `bas
 ./scripts/verify-project.sh
 ```
 
-`--list` и `--dry-run` показывают имя, layer и command до запуска, чтобы review не зависел от догадок.
+`--list` and `--dry-run` show the name, layer, and command before execution so that review does not depend on assumptions.
 
-Диспетчер валидирует весь профиль до запуска команд. При отсутствующем или невалидном профиле он возвращает код `2`. Падение любой выбранной команды с `required=1` даёт код `1`, а падение необязательной проверки — предупреждение. Итог включает число успешных обязательных проверок.
+The dispatcher validates the entire profile before running commands. If the profile is missing or invalid, it returns exit code `2`. Failure of any selected command with `required=1` results in exit code `1`, while failure of an optional check results in a warning. The summary includes the number of successful required checks.
 
-Полный Acceptance Gate — запуск всего активного профиля без фильтра, с минимум одной обязательной проверкой и успешным прохождением всех обязательных команд. Если обязательных проверок в выбранном наборе нет, обычный запуск возвращает код `2`. Для диагностики предусмотрен `--diagnostic`; частичный `--only`, диагностика, `--list` и `--dry-run` не подтверждают полную приёмку.
+A full Acceptance Gate runs the entire active profile without filters, includes at least one required check, and passes all required commands. If there are no required checks in the selected set, a normal run returns exit code `2`. Use `--diagnostic` for diagnostics; partial `--only` runs, diagnostics, `--list`, and `--dry-run` do not confirm full acceptance.
 
-`scripts/security-scan.sh` — dependency-free baseline для tracked и неигнорируемых untracked файлов, включая tracked generated artifacts: private key material, AWS/GCP key patterns, вероятные токены GitHub, Anthropic, OpenAI и Slack, credentialed database URLs, регистронезависимые sensitive assignments (включая составные имена переменных, суффиксы и quoted keys) и `.env`-файлы. Ссылки на окружение и строковые литералы различаются на уровне отдельных присваиваний; независимые находки не подавляются. Это эвристика: чистый результат не доказывает отсутствие секретов; игнорируемые untracked файлы и Git history не входят в область сканирования. Сканер не печатает найденные значения, только `path:line` и категорию; ошибка чтения или перечисления файлов завершает сканирование с кодом `2`. Он не заменяет SAST, dependency audit, container scan или DAST; утверждённые проектные инструменты добавляются отдельными строками `security` в профиль.
+`scripts/security-scan.sh` is a dependency-free baseline for tracked and non-ignored untracked files, including tracked generated artifacts: private key material, AWS/GCP key patterns, likely GitHub, Anthropic, OpenAI, and Slack tokens, database URLs containing credentials, case-insensitive sensitive assignments (including compound variable names, suffixes, and quoted keys), and `.env` files. Environment references and string literals are distinguished at the individual assignment level; independent findings are not suppressed. This is a heuristic: a clean result does not prove the absence of secrets; ignored untracked files and Git history are outside the scanning scope. The scanner does not print the detected values, only `path:line` and a category; an error reading or listing files ends the scan with exit code `2`. It does not replace SAST, dependency audits, container scanning, or DAST; approved project tools are added as separate `security` rows in the profile.
 
-Профиль не должен содержать токены, пароли или приватные ключи. Если команда может раскрыть секрет, она не включается в verification gate до отдельного решения и безопасного способа маскирования.
+The profile must not contain tokens, passwords, or private keys. If a command may expose a secret, do not include it in the verification gate until a separate decision has been made and a safe masking method is available.
 
-## 11. Онбординг verification profile
+## 11. Verification Profile Onboarding
 
-1. Прочитать manifests, lockfiles, CI и существующие scripts.
-2. Выбрать команды, которые уже подтверждены проектом; не устанавливать инструменты молча.
-3. Создать `scripts/verification-profile.tsv` и заполнить примеры для фактического stack.
-4. Добавить baseline secret scan и доступные security checks с явными `required` и failure semantics.
-5. Запустить `./scripts/verify-project.sh --dry-run`, затем полный gate.
-6. Зафиксировать baseline, ограничения окружения и evidence в DESIGN-манифесте и `state.md` целевого проекта.
+1. Read manifests, lockfiles, CI, and existing scripts.
+2. Choose commands already confirmed by the project; do not silently install tools.
+3. Create `scripts/verification-profile.tsv` and fill in the examples for the actual stack.
+4. Add the baseline secret scan and available security checks with explicit `required` settings and failure semantics.
+5. Run `./scripts/verify-project.sh --dry-run`, then the full gate.
+6. Record the baseline, environment constraints, and evidence in the target project's DESIGN manifest and `state.md`.
 
-Если проект не может запустить слой проверки, агент фиксирует его как `blocked` с причиной в DESIGN-манифесте и `state.md`; отсутствующая команда не добавляется в профиль как фиктивная успешная проверка.
+If the project cannot run a verification layer, the agent records it as `blocked` with the reason in the DESIGN manifest and `state.md`; do not add a missing command to the profile as a fictitious successful check.
 
-## 12. CI и release gate
+## 12. CI and Release Gate
 
-Workflow стартер-кита `.github/workflows/verification.yml` запускает локальный профиль на push в `main`, pull request в `main` и ручном запуске. Workflow использует `contents: read`, `pull_request` без trusted-base secrets, checkout без persistent credentials, проверяет Markdown-ссылки и чистоту рабочего дерева. Установщик не переносит workflow в целевые проекты. Подключай подтверждённые команды через CI проекта.
+The starter kit workflow `.github/workflows/verification.yml` runs the local profile on pushes to `main`, pull requests to `main`, and manual runs. The workflow uses `contents: read`, `pull_request` without trusted-base secrets, checkout without persistent credentials, and verifies Markdown links and a clean working tree. The installer does not transfer the workflow to target projects. Integrate confirmed commands through the project's CI.
 
-Release sequence: зелёный Gate → Conventional Commit → push → подтверждённый CI check → annotated tag вида `vYYYY.N.P` → push tag. Непустой или красный Gate блокирует tag; GitHub Release создаётся из уже проверенного tag.
+Release sequence: green Gate → Conventional Commit → push → confirmed CI check → annotated tag in the form `vYYYY.N.P` → push tag. An empty or red Gate blocks the tag; a GitHub Release is created from the already verified tag.
 
-## 13. Итоговый checklist
+## 13. Final Checklist
 
-Definition of Done: подтверждены применимые инварианты, выполнены обязательные проверки, обновлены затронутые документы и зафиксирован результат. Заблокированная обязательная проверка означает blocked, а не accepted; исходные несвязанные падения сообщаются отдельно.
+Definition of Done: applicable invariants are confirmed, required checks are completed, affected documents are updated, and the result is recorded. A blocked required check means blocked, not accepted; unrelated baseline failures are reported separately.
 
-- [ ] Проверки определены до изменения.
-- [ ] Есть positive, negative и regression coverage.
-- [ ] Security риски явно рассмотрены.
-- [ ] Создан project-local verification profile с подтверждёнными командами.
-- [ ] Выполнен secret baseline и добавлены доступные SAST/SCA проверки.
-- [ ] Есть safe probe или dry-run, если изменение рискованное.
-- [ ] Известен rollback/stop path.
-- [ ] Контекст проверки ограничен impact surface.
-- [ ] При сомнении запущена targeted deep check.
-- [ ] Результат имеет evidence и измеримый outcome.
-- [ ] Для интеграции или релиза проверены принятые в проекте обязательные гейты.
+- [ ] Checks were defined before the change.
+- [ ] There is positive, negative, and regression coverage.
+- [ ] Security risks have been explicitly considered.
+- [ ] A project-local verification profile exists with confirmed commands.
+- [ ] The secret baseline was run and available SAST/SCA checks were added.
+- [ ] A safe probe or dry-run exists if the change is risky.
+- [ ] The rollback/stop path is known.
+- [ ] Verification context is limited to the impact surface.
+- [ ] A targeted deep check was run when in doubt.
+- [ ] The result has evidence and a measurable outcome.
+- [ ] The project's established required gates have been verified for integration or release.

@@ -1,71 +1,71 @@
-# DESIGN-манифест создания и эволюции (Zero Vibe Coding)
+# DESIGN Manifest for Development and Evolution (Zero Vibe Coding)
 
-> **Стандарт проекта:** Для значимого изменения контракта, модели данных или интеграции зафиксируй дизайн до реализации. Для локального изменения достаточно цели, инварианта и проверки.
-> Манифест основан на подходе [AI loves straight roads](https://avpdev.com/ru/blog/ai-loves-straight-roads/) и [Architect of the Future](https://avpdev.com/ru/blog/architect-of-the-future/): локально правильный код не должен разрушать системные инварианты и архитектурные границы.
-> Заполняй применимые разделы при создании и последующих изменениях. Инварианты подтверждаются проверками. Стадии и миграции описаны в [политике жизненного цикла](lifecycle.md).
+> **Project standard:** For a significant change to a contract, data model, or integration, document the design before implementation. For a local change, the goal, invariant, and verification are sufficient.
+> The manifest is based on [AI Loves Straight Roads: Why Local Optimization Breaks Complex Systems](https://avpdev.com/en/blog/ai-loves-straight-roads/) and [The Architect of the Future: From Line Reviews to Design Reviews](https://avpdev.com/en/blog/architect-of-the-future/): locally correct code must not break system invariants or architectural boundaries.
+> Complete the applicable sections during initial development and subsequent changes. Invariants are confirmed through verification. Stages and migrations are described in the [lifecycle policy](lifecycle.md).
 
 ---
 
-## Шаблон для заполнения
+## Template
 
 ````markdown
-# DESIGN: [Название фичи / модуля / эндпоинта]
+# DESIGN: [Feature / Module / Endpoint Name]
 
-## 0. Grill-Me Frontier (Разрешение развилок ДО написания кода)
-> Правило Покока: *«Поиск фактов — обязанность агента; принятие решений — прерогатива человека».*
-> Сначала проверь репозиторий и существующий контракт. Вынеси на согласование развилки, которые меняют согласованный результат, архитектуру или риск. Обратимое допущение зафиксируй и проверь.
-- [ ] ❓ **Q1 — [Название развилки]:** [Суть вопроса, граничные условия]
-  ➡️ **Рекомендация агента:** [Предлагаемый вариант и архитектурное обоснование]
-  *(Статус: Согласовано с человеком)*
+## 0. Grill-Me Frontier (Resolving Decision Points BEFORE Writing Code)
+> Pocock's rule: *"Finding facts is the agent's responsibility; making decisions is the human's prerogative."*
+> Check the repository and existing contract first. Seek approval for decisions that change the agreed outcome, architecture, or risk. Record and verify reversible assumptions.
+- [ ] ❓ **Q1 — [Decision Point]:** [Question and boundary conditions]
+  ➡️ **Agent recommendation:** [Proposed option and architectural rationale]
+  *(Status: Approved by the human)*
 
-## 1. Метаданные и скоуп
-- **Затронутые модули / сервисы:** [директории/пакеты, например: src/modules/rag, src/workers, src/components]
-- **File ownership / scope:** [Кто владеет каталогом/файлами и какие области изменять нельзя.]
-- **Структура файлов (если важна):** [Граница ответственности, которую нужно сохранить или выделить.]
-- **Делегирование:** Zone 1 / Zone 2 / Zone 3 по AGENTS.md.
+## 1. Metadata and Scope
+- **Affected modules / services:** [Directories/packages, e.g., src/modules/rag, src/workers, src/components]
+- **File ownership / scope:** [Who owns the directories/files and which areas must not be changed.]
+- **File structure (if relevant):** [Responsibility boundary to preserve or establish.]
+- **Delegation:** Zone 1 / Zone 2 / Zone 3 according to AGENTS.md.
 - **Topology:** `orchestrated` / `single` / `fixed-pipeline` / `side-research` / `parallel` / `hierarchical`
-- **Рабочие гипотезы:** [Что предполагается, но ещё не проверено. Не выдавать за факт.]
-- **Цель:** Краткое описание задачи (1-2 предложения).
-- **Stop / escalation conditions:** [Когда остановиться, запросить человека или повысить глубину рассуждения.]
-- **Run ID / replay reference:** [Идентификатор запуска или ссылка на воспроизводимый контекст.]
-- **Measured outcome:** `[accepted | rejected | blocked]`; [1–2 метрики и ссылка на evidence]. Заполняется после Verification Gate; для Lightweight — `n/a`.
-- **Pre-change impact check:** [Затронутые consumers, baseline и возможные последствия до правки.]
-- **Verification layers:** [static / positive / negative / security / regression / integration — что покрывается.]
-- **Rollback / stop plan:** [Как безопасно остановиться или откатить изменение при неудаче.]
-- **Context budget / escalation trigger:** [Лимит области проверки и условия targeted deep check.]
-- **Используемые SDK / библиотеки:** [версии и подтверждённые API; Context7 или официальная документация.]
-- **Lifecycle stage:** [Prototype / Production / Scale, фактический риск контура]. Реальные данные, деньги и внешние потребители требуют Production-проверок даже для небольшой правки.
+- **Working hypotheses:** [What is assumed but not yet verified. Do not present as fact.]
+- **Goal:** A brief description of the task (1–2 sentences).
+- **Stop / escalation conditions:** [When to stop, ask the human, or increase reasoning effort.]
+- **Run ID / replay reference:** [Run identifier or reference to reproducible context.]
+- **Measured outcome:** `[accepted | rejected | blocked]`; [1–2 metrics and a reference to evidence]. Complete after the Verification Gate; for Lightweight — `n/a`.
+- **Pre-change impact check:** [Affected consumers, baseline, and potential consequences before making changes.]
+- **Verification layers:** [static / positive / negative / security / regression / integration — specify coverage.]
+- **Rollback / stop plan:** [How to stop safely or roll back the change on failure.]
+- **Context budget / escalation trigger:** [Verification scope limit and conditions for a targeted deep check.]
+- **SDKs / libraries used:** [Versions and verified APIs; Context7 or official documentation.]
+- **Lifecycle stage:** [Prototype / Production / Scale, actual risk of the affected system boundary]. Real data, money, and external consumers require Production checks even for a small change.
 
 ## 1.1. Lifecycle & Evolution
-- **Stable contracts / mutable implementation:** [Что сохраняется, что заменяется.]
-- **Affected consumers / compatibility:** [Потребители, совместимость, согласованный breaking change.]
-- **Migration / recovery:** [Порядок перехода, backup/restore, rollback или forward fix.]
-- **Deprecation / debt:** [Критерии удаления, владелец и дата или условие пересмотра.]
+- **Stable contracts / mutable implementation:** [What is preserved and what is replaced.]
+- **Affected consumers / compatibility:** [Consumers, compatibility, approved breaking change.]
+- **Migration / recovery:** [Transition sequence, backup/restore, rollback or forward fix.]
+- **Deprecation / debt:** [Removal criteria, owner, and review date or condition.]
 
-## 2. Инварианты системы (Invariants — что НЕ МОЖЕТ произойти ни при каких обстоятельствах)
-- [ ] Инвариант 1 (например: «Баланс пользователя не может стать отрицательным»).
-- [ ] Инвариант 2 (например: «Транзакционность: списание и создание записи происходят строго в одной транзакции»).
-- [ ] Инвариант 3 (например: «Изоляция тенантов: RAG-поиск и эмбеддинги никогда не отдают документы чужого projectId»).
-- [ ] Инвариант 4 (например: «Векторная размерность: размерность векторов строго соответствует индексу HNSW pgvector»).
-- [ ] Инвариант 5 (например: «Non-Destructive: записи не удаляются физически, только soft-delete»).
+## 2. System Invariants (What MUST NEVER Happen Under Any Circumstances)
+- [ ] Invariant 1 (e.g., "The user's balance must not become negative").
+- [ ] Invariant 2 (e.g., "Transactional integrity: debiting and creating the record must occur in the same transaction").
+- [ ] Invariant 3 (e.g., "Tenant isolation: RAG search and embeddings never return documents belonging to another projectId").
+- [ ] Invariant 4 (e.g., "Vector dimensionality: vector dimensions must match the pgvector HNSW index").
+- [ ] Invariant 5 (e.g., "Non-Destructive: records are not physically deleted; only soft deletion is allowed").
 
-## 3. Конечный автомат (State Machine)
-- **Состояния сущности:** `DRAFT` → `PENDING` → `PROCESSING` → `COMPLETED` | `FAILED`
-- **Недопустимые переходы:** Запрещен переход из `FAILED` в `COMPLETED` в обход очереди.
-- **Владелец состояния:** Кто имеет право инициировать переход между состояниями (воркер BullMQ, пользователь, вебхук).
+## 3. State Machine
+- **Entity states:** `DRAFT` → `PENDING` → `PROCESSING` → `COMPLETED` | `FAILED`
+- **Invalid transitions:** A transition from `FAILED` to `COMPLETED` that bypasses the queue is prohibited.
+- **State owner:** Who may initiate state transitions (BullMQ worker, user, webhook).
 
-## 4. Границы сбоев (Failure Modes & Idempotency)
-- **Сетевой таймаут / сбой LLM API:** (что делаем: fallback / экспоненциальный retry с джиттером / fail-closed с понятной ошибкой).
-- **Дублирующие запросы / повторный вебхук:** (защита по Idempotency Key / unique constraint / Redis SETNX с TTL).
-- **Невалидные данные:** (Zod/Pydantic fail-closed, возврат 400 Bad Request, никаких частичных сохранений).
-- **Runtime limits:** [Deadline, число попыток, backoff/jitter, бюджет запросов, токенов и стоимости, если применимо.]
-- **Retry safety:** [Повтор только временных сбоев при идемпотентности или проверке результата предыдущей попытки; общий deadline не продлевается каждым retry.]
-- **Degradation:** [Явный failure/partial state, совместимый fallback, предел повторов, наблюдаемость; не ослаблять доступ, целостность или смысл результата.]
+## 4. Failure Modes & Idempotency
+- **Network timeout / LLM API failure:** (what to do: fallback / exponential retry with jitter / fail-closed with a clear error).
+- **Duplicate requests / repeated webhook:** (protection via Idempotency Key / unique constraint / Redis SETNX with TTL).
+- **Invalid data:** (Zod/Pydantic fail-closed, return 400 Bad Request, no partial persistence).
+- **Runtime limits:** [Deadline, number of attempts, backoff/jitter, request, token, and cost budgets where applicable.]
+- **Retry safety:** [Retry only transient failures when the operation is idempotent or the previous attempt's outcome has been verified; each retry does not extend the overall deadline.]
+- **Degradation:** [Explicit failure/partial state, compatible fallback, retry limit, observability; do not weaken access controls, integrity, or the meaning of the result.]
 
-## 5. Контракты данных (Схемы валидации / DTO)
+## 5. Data Contracts (Validation Schemas / DTO)
 ```typescript
 export interface RequestPayload {
-  // строго типизированные поля (никаких any!)
+  // strictly typed fields (no any!)
 }
 
 export interface ResponsePayload {
@@ -75,24 +75,24 @@ export interface ResponsePayload {
 }
 ```
 
-## 5.1. Визуальный и тематический контракт (UI/UX & Design Tokens — если задача затрагивает фронтенд)
-- [ ] **Design system:** Использованы существующие семантические токены и компоненты, если проект принял тематизацию. Новый паттерн обоснован после проверки существующих примитивов.
-- [ ] **Горячая заменяемость тем:** Если проект поддерживает темы, переключение не требует правок компонентов.
-- [ ] **Иерархия действий:** Соблюдены проектные паттерны приоритетов действий.
-- [ ] **Состояния элементов:** Реализованы стили `:hover`, `:active`, `:focus-visible` (фокусный контур для клавиатуры), `:disabled` и `loading state`.
-- [ ] **Доступность и верстка:** Семантические элементы, контрастность и адаптивность по требованиям проекта.
-- [ ] **Состояния сценария:** Применимые Loading / Empty / Success / Error / Restricted / Partial / Degraded определены и проверены.
-- [ ] **Эволюция компонентов:** При дублировании паттернов или нарушении границ оцени рефакторинг вместо очередной локальной заплатки.
+## 5.1. Visual and Theme Contract (UI/UX & Design Tokens — If the Task Affects the Frontend)
+- [ ] **Design system:** Use existing semantic tokens and components if the project has adopted theming. Justify a new pattern after checking existing primitives.
+- [ ] **Hot-swappable themes:** If the project supports themes, switching them does not require component changes.
+- [ ] **Action hierarchy:** Follow the project's action-priority patterns.
+- [ ] **Element states:** Implement styles for `:hover`, `:active`, `:focus-visible` (keyboard focus outline), `:disabled`, and the `loading state`.
+- [ ] **Accessibility and layout:** Semantic elements, contrast, and responsive design meet project requirements.
+- [ ] **Scenario states:** Define and verify applicable Loading / Empty / Success / Error / Restricted / Partial / Degraded states.
+- [ ] **Component evolution:** When patterns are duplicated or boundaries violated, evaluate refactoring instead of adding another local patch.
 
 ## 6. Acceptance Invariants & Automated Verification Gate
-- [ ] Happy path автотест с валидными данными.
-- [ ] Негативный тест: отказ внешнего сервиса или разрыв соединения.
-- [ ] Негативный тест: передача невалидных входных данных (проверка 400 ошибки).
-- [ ] Тест идемпотентности: повторный запрос с тем же ключом не создает дублей.
-- [ ] Детерминированный путь определён; LLM не заменяет работающую логику без явной причины.
-- [ ] Существующие проверки не ослаблены ради прохождения Automated Verification Gate.
-- [ ] Тест интерфейса (если есть UI): применимые состояния, проектные viewport и клавиатурная навигация.
-- [ ] Автоматическая верификация: пройдены применимые обязательные проверки; каждый критичный инвариант связан с evidence.
-- [ ] Документация: обновлены затронутые контракты, state и ADR при архитектурном решении.
-- [ ] Git-фиксация: по принятому процессу проекта.
+- [ ] Happy path automated test with valid data.
+- [ ] Negative test: external service failure or connection loss.
+- [ ] Negative test: invalid input data (verify the 400 error).
+- [ ] Idempotency test: a repeated request with the same key does not create duplicates.
+- [ ] The deterministic path is defined; an LLM does not replace working logic without an explicit reason.
+- [ ] Existing checks are not weakened to pass the Automated Verification Gate.
+- [ ] Interface test (if there is a UI): applicable states, project viewports, and keyboard navigation.
+- [ ] Automated verification: all applicable required checks have passed; every critical invariant is linked to evidence.
+- [ ] Documentation: affected contracts and state are updated, along with ADRs for architectural decisions.
+- [ ] Git commit: follow the adopted project process.
 ````

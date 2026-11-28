@@ -1,47 +1,47 @@
-# [Название проекта]
+# [Project name]
 
-[Назначение проекта, пользователи и основные сценарии.]
+[Project purpose, users, and primary workflows.]
 
-Этот файл содержит рабочие соглашения проекта. Заполните поля по [протоколу онбординга](docs/onboarding-protocol.md) и открывайте профильные документы по задаче. Формат [AGENTS.md](https://agents.md/) поддерживается разными инструментами. Порядок загрузки проверяйте для используемого клиента.
+This file contains the project's working agreements. Complete the fields using the [onboarding protocol](docs/onboarding-protocol.md) and consult the relevant documents for each task. The [AGENTS.md](https://agents.md/) format is supported by various tools. Check instruction loading order for the client in use.
 
-## Контекст проекта
+## Project context
 
-- Стек и версии — [подтверждённые манифестами и lockfiles].
-- Структура и владельцы модулей — [ключевые каталоги, точки входа и границы].
-- Команды разработки и проверки — [фактические команды, рабочие каталоги и зависимости окружения].
-- Стадия эксплуатации и триггеры пересмотра — [фактические риски и потребители].
+- Stack and versions — [confirmed by manifests and lockfiles].
+- Structure and module owners — [key directories, entry points, and boundaries].
+- Development and verification commands — [actual commands, working directories, and environment dependencies].
+- Operational stage and review triggers — [actual risks and consumers].
 
-В существующем проекте опирайтесь на код, принятые контракты и работающие проверки. Для нового проекта выбирайте минимальный стек под продукт и условия эксплуатации. Уточняйте только решения, которые нельзя вывести из репозитория и которые существенно меняют работу. При работе с библиотеками сверяйте API с документацией установленной версии, используя Context7 или официальные источники. Не обновляйте зависимости ради совпадения с примерами из документации.
+For an existing project, rely on the code, accepted contracts, and working checks. For a new project, choose the minimum stack suited to the product and operating conditions. Clarify only decisions that cannot be inferred from the repository and materially affect the work. When using libraries, verify APIs against documentation for the installed version using Context7 or official sources. Do not upgrade dependencies merely to match documentation examples.
 
-## Обязательные границы
+## Mandatory boundaries
 
-| Зона | Полномочия |
+| Zone | Authority |
 |---|---|
-| Zone 1 | Агент реализует обратимые изменения внутри принятого контракта. |
-| Zone 2 | Человек согласует изменение контракта, агент реализует и проверяет. |
-| Zone 3 | Необратимые операции и критические решения остаются под контролем человека; исполнение только по отдельному разрешению. |
+| Zone 1 | The agent implements reversible changes within the accepted contract. |
+| Zone 2 | The human approves a contract change; the agent implements and verifies it. |
+| Zone 3 | Irreversible operations and critical decisions remain under human control; execution requires separate authorization. |
 
-- Сохраняйте существующие данные, чужие изменения и пользовательские инструкции. Проверяйте входные данные на границах доверия и сохраняйте контекст ошибок без раскрытия секретов.
-- До изменения схемы хранимых данных, модели доступа, согласованного межсервисного контракта, протокола безопасности или правил проведения финансовых транзакций получите явное подтверждение на конкретное изменение. Кратко укажите причину, затронутые компоненты и план. Обратимое исправление в рамках принятого контракта можно выполнять после обычной проверки влияния.
-- Согласовывайте необратимые операции и публикацию. Сохраняйте проверяемость тестов и сообщайте фактические результаты проверок.
-- Согласовывайте новые внешние сервисы, платные зависимости, передачу данных за пределы принятого контура, значимую смену стека и ослабление обязательных проверок.
-- Применяйте [политику жизненного цикла](docs/lifecycle.md) по риску затронутого контура, включая небольшие изменения реальных данных и финансовых операций. Безопасность, целостность данных и изоляция обязательны на любой стадии.
-- При коммите проверяйте status и diff, добавляйте только относящиеся к задаче файлы. Если в проекте приняты Conventional Commits, следуйте им. Push, PR и релиз выполняются отдельно по запросу или принятому процессу.
+- Preserve existing data, other contributors' changes, and user instructions. Validate inputs at trust boundaries and retain error context without disclosing secrets.
+- Before changing a stored-data schema, access model, agreed interservice contract, security protocol, or financial transaction rules, obtain explicit approval for the specific change. Briefly state the rationale, affected components, and plan. A reversible fix within an accepted contract can proceed after the usual impact assessment.
+- Obtain approval for irreversible operations and publication. Maintain test verifiability and report actual verification results.
+- Obtain approval for new external services, paid dependencies, data transfers outside the accepted boundary, significant stack changes, and weakening mandatory checks.
+- Apply the [lifecycle policy](docs/lifecycle.md) according to the risk of the affected subsystem, including small changes involving real data and financial operations. Security, data integrity, and isolation are mandatory at every stage.
+- Before committing, inspect status and diff and stage only task-related files. Follow Conventional Commits if the project uses them. Pushes, PRs, and releases are separate actions performed on request or under the accepted process.
 
-## Рабочие рекомендации
+## Working guidance
 
-- Делайте минимальное связное изменение. При существенных развилках зафиксируйте инварианты, условия отказа и критерии приёмки. Добавляйте автомат состояний и идемпотентность, когда этого требует сценарий. См. [шаблон DESIGN](docs/design-manifest-template.md).
-- Выбирайте способ работы по риску, связности задачи и доступным инструментам. Делегируйте независимые части, если это ускоряет работу или улучшает проверку. Для длинной задачи сохраняйте короткий checkpoint при передаче, паузе или после значимого этапа. См. [маршрутизацию](docs/agent-routing.md).
-- Размер файла, diff и отчёта — ориентиры. Для рукописного файла 300–500 строк обычно удобно. При 500–800 строках и выше оцените связность и возможные границы, если размер реально мешает. Большой связный файл допустим. Жёсткий лимит площадки соблюдайте сменой формата, например кратким комментарием со ссылкой на полный отчёт. Повторяйте попытку при новых данных или новом способе решения. См. [структуру проекта](docs/project-structure.md).
-- Применяйте [архитектурные рекомендации](docs/architecture.md) и [дизайн-токены](docs/theme-tokens.md) по типу проекта. Используйте существующую дизайн-систему и проверяйте доступность затронутого интерфейса.
-- Проверяйте локальный Git baseline. Сверяйте удалённую ветку, когда от её актуальности зависит интеграция. Если сеть недоступна или ветка отстаёт, сообщите об этом и продолжайте независимую работу. Синхронизируйте ветки только осознанно, с учётом локальных изменений.
+- Make the smallest coherent change. For substantial decision points, record invariants, failure conditions, and acceptance criteria. Add state machines and idempotency when the workflow requires them. See the [DESIGN template](docs/design-manifest-template.md).
+- Choose the working approach based on risk, task coupling, and available tools. Delegate independent parts if doing so accelerates work or improves verification. For long tasks, save a brief checkpoint at handoff, pause, or after a meaningful milestone. See [agent routing](docs/agent-routing.md).
+- File size, diff size, and report length are guidelines. For a manually authored file, 300–500 lines are usually convenient. At 500–800 lines or more, assess cohesion and possible boundaries if size becomes a practical obstacle. A large cohesive file is acceptable. Meet hard platform limits by changing format, for example with a brief comment linking to a full report. Retry when new evidence or a new approach becomes available. See [project structure](docs/project-structure.md).
+- Apply the [architecture guidance](docs/architecture.md) and [design tokens](docs/theme-tokens.md) according to the project type. Use the existing design system and verify accessibility of the affected interface.
+- Check the local Git baseline. Check the remote branch when integration depends on it being current. If the network is unavailable or the branch is behind, report it and continue independent work. Synchronize branches deliberately, accounting for local changes.
 
-## Проверка результата
+## Result verification
 
-1. Определите, что затронуто, и при необходимости зафиксируйте исходный результат проверок.
-2. Запустите проверки проекта, относящиеся к изменению. Добавьте регрессионный тест при изменении поведения, если имеющееся покрытие пропускает сценарий. Для документации выбирайте проверки ссылок, примеров и согласованности.
-3. Если проект принял профиль `scripts/verification-profile.tsv`, используйте `./scripts/verify-project.sh`. CI и условия релиза определяет целевой проект.
-4. Сообщите, что выполнено, какие ошибки появились после изменения, какие были в baseline и какие проверки недоступны. Не расширяйте задачу ради устранения исходных несвязанных падений.
-5. Не объявляйте задачу принятой, пока не пройдены применимые обязательные проверки, подтверждены инварианты и обновлены затронутые документы. Диагностика, частичный прогон и заблокированные проверки не являются полным Acceptance Gate.
+1. Identify what is affected and record baseline verification results when necessary.
+2. Run the project checks relevant to the change. Add a regression test when behavior changes and existing coverage misses the scenario. For documentation, check links, examples, and consistency.
+3. If the project has adopted `scripts/verification-profile.tsv`, use `./scripts/verify-project.sh`. The target project defines CI and release conditions.
+4. Report what was completed, which failures appeared after the change, which existed in the baseline, and which checks were unavailable. Do not expand the task to fix unrelated baseline failures.
+5. Do not declare the task accepted until applicable mandatory checks pass, invariants are confirmed, and affected documents are updated. Diagnostics, partial runs, and blocked checks do not constitute a full Acceptance Gate.
 
-См. [проверки и оценку влияния](docs/verification.md). Обновляйте [журнал состояния](docs/state.md) при значимом изменении или передаче работы после установки кита. Принятые архитектурные решения фиксируйте в [ADR](docs/decisions.md).
+See [verification and impact assessment](docs/verification.md). Update the [state ledger](docs/state.md) at meaningful changes or handoff after installing the kit. Record accepted architectural decisions in the [ADR registry](docs/decisions.md).

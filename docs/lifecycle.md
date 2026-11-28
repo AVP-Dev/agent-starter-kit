@@ -1,52 +1,52 @@
-# Жизненный цикл и эволюция приложения (Application Lifecycle Policy)
+# Application Lifecycle and Evolution Policy
 
-> **Назначение:** управляемая эволюция без нарушения контрактов, потери данных и неконтролируемого техдолга.
-> **Граница:** требования определяются реальными рисками эксплуатации, а не названием релиза или размером задачи. Политика дополняет AGENTS.md и проектную архитектуру.
+> **Purpose:** controlled evolution without breaking contracts, losing data, or allowing uncontrolled technical debt.
+> **Boundary:** requirements are determined by actual operational risks, not release names or task size. This policy complements AGENTS.md and the project architecture.
 
-## 1. Стабильные контракты и изменяемая реализация
+## 1. Stable Contracts and Mutable Implementation
 
-Стабильные контракты: владение данными, публичные API и события, доступ и изоляция, бизнес-инварианты, сохраняемые схемы и конфигурации потребителей. Изменение согласованного контракта проходит Confirmation Gate из AGENTS.md.
+Stable contracts include data ownership, public APIs and events, access and isolation, business invariants, persisted schemas, and consumer-facing configuration. Changing an agreed contract requires passing the Confirmation Gate in AGENTS.md.
 
-Внутренние алгоритмы, приватные компоненты, адаптеры и запросы можно заменять внутри принятых границ при сохранении поведения и проверок. Не превращай случайную деталь реализации в публичный контракт.
+Internal algorithms, private components, adapters, and queries may be replaced within accepted boundaries as long as behavior and verification are preserved. Do not turn incidental implementation details into public contracts.
 
-## 2. Стадии эксплуатации
+## 2. Operational Stages
 
-| Требование | Prototype / MVP | Production / реальные данные | Scale / измеримый рост |
+| Requirement | Prototype / MVP | Production / Real Data | Scale / Measurable Growth |
 |---|---|---|---|
-| Архитектура | Минимальная достаточная | Стабильные контракты | Оптимизация по измерениям |
-| Миграции | Упрощённые только без ценных данных и потребителей | Версионированные, проверяемые | Поэтапная совместимость |
-| Восстановление | По риску | Резервирование и проверка восстановления ценных данных | Целевые RPO/RTO |
-| Тесты | Критичные сценарии | Контрактные и регрессионные | Нагрузочные и отказоустойчивые по риску |
-| Внешние вызовы | Ограниченные таймауты | Таймауты, контролируемые повторы | Бюджеты, backpressure, деградация |
-| Наблюдаемость | Базовые ошибки | Логи и ключевые метрики | SLO и алертинг по требованиям |
+| Architecture | Minimum sufficient | Stable contracts | Measurement-driven optimization |
+| Migrations | Simplified only without valuable data or consumers | Versioned and verifiable | Staged compatibility |
+| Recovery | Risk-based | Backups and recovery testing for valuable data | Target RPO/RTO |
+| Tests | Critical scenarios | Contract and regression tests | Load and resilience tests based on risk |
+| External calls | Bounded timeouts | Timeouts and controlled retries | Budgets, backpressure, degradation |
+| Observability | Basic errors | Logs and key metrics | SLOs and alerting according to requirements |
 
-Безопасность, целостность данных, права доступа и транзакционные инварианты обязательны на всех стадиях. Реальные данные, деньги, внешние потребители или критичные бизнес-процессы включают Production-требования для затронутого контура даже в маленьком PR. Scale-требования включаются по измеримым ограничениям и целям, не по произвольному числу пользователей.
+Security, data integrity, access permissions, and transactional invariants are mandatory at every stage. Real data, money, external consumers, or critical business processes activate Production requirements for the affected system boundary, even in a small PR. Scale requirements are activated by measurable constraints and goals, not by an arbitrary user count.
 
-## 3. Контракты и миграции
+## 3. Contracts and Migrations
 
-- Определи потребителей, версии и влияние изменения API, событий, схем и конфигурации.
-- Предпочитай совместимые изменения. Breaking change требует явного согласования, плана перехода и проверки потребителей.
-- Не редактируй уже применённые миграции; исправляй новой миграцией.
-- Для реальных данных подготовь backup, проверку восстановления, тест миграции на изолированной копии и критерии остановки. Rollback кода не гарантирует rollback данных; предусмотрены forward fix или restore по ситуации.
-- При совместном существовании версий рассмотри expand → migrate → contract. Удаление старой схемы допустимо после подтверждения перехода потребителей.
-- Подготовка миграции не означает разрешения выполнить её в production.
+- Identify consumers, versions, and the impact of changes to APIs, events, schemas, and configuration.
+- Prefer compatible changes. A breaking change requires explicit approval, a transition plan, and consumer verification.
+- Do not edit previously applied migrations; make corrections with a new migration.
+- For real data, prepare a backup, recovery verification, migration testing on an isolated copy, and stop criteria. Rolling back code does not guarantee data rollback; plan a forward fix or restore as appropriate.
+- When multiple versions coexist, consider expand → migrate → contract. Removing the old schema is acceptable after confirming that consumers have transitioned.
+- Preparing a migration does not authorize executing it in production.
 
-## 4. Технический долг
+## 4. Technical Debt
 
-Временное решение допустимо внутри красных линий, если в [state.md](state.md) или принятом трекере записаны причина, scope, риск, владелец и дата или измеримое условие пересмотра.
+A temporary solution is acceptable within established red lines if its reason, scope, risk, owner, and review date or measurable review condition are recorded in [state.md](state.md) or the adopted tracker.
 
-Без даты или условия пересмотра это забытый костыль, а не управляемый техдолг. При наступлении условия пересмотра оцени исправление, продление с обоснованием или удаление.
+Without a review date or condition, it is a forgotten workaround rather than managed technical debt. When the review condition is met, evaluate fixing it, extending it with justification, or removing it.
 
-## 5. Deprecation и вывод из эксплуатации
+## 5. Deprecation and Decommissioning
 
-1. Установи всех известных потребителей, включая внешних клиентов, фоновые задачи и конфигурации.
-2. Зафиксируй замену, статус deprecated, период перехода и критерий завершения.
-3. Подтверди переход потребителей или отсутствие использования; при неизвестности не удаляй стабильный контракт.
-4. После согласования при необходимости удали старую реализацию, зависимости, конфигурации и устаревшую документацию.
-5. Проверь регрессии и сохранность данных.
+1. Identify all known consumers, including external clients, background jobs, and configurations.
+2. Record the replacement, deprecated status, transition period, and completion criterion.
+3. Confirm that consumers have transitioned or that the contract is unused; if this is unknown, do not remove a stable contract.
+4. After obtaining approval where necessary, remove the old implementation, dependencies, configuration, and obsolete documentation.
+5. Check for regressions and verify data preservation.
 
-Непубличный мёртвый код удаляй после проверки использования и затронутых тестов, без обязательного переходного периода.
+Remove non-public dead code after checking its usage and affected tests, without requiring a transition period.
 
-## 6. Переход между стадиями
+## 6. Transitioning Between Stages
 
-Проведи targeted lifecycle review: данные, совместимость, доступ, восстановление, эксплуатационные ограничения, обязательные проверки и известный долг. Запиши фактическую стадию и триггеры пересмотра в AGENTS.md, принятые архитектурные решения — в [decisions.md](decisions.md), текущий результат — в state.md.
+Conduct a targeted lifecycle review covering data, compatibility, access, recovery, operational constraints, required checks, and known debt. Record the actual stage and review triggers in AGENTS.md, accepted architectural decisions in [decisions.md](decisions.md), and the current outcome in state.md.

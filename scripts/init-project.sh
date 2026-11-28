@@ -2,11 +2,11 @@
 set -euo pipefail
 
 usage() {
-  printf '%s\n' "Использование: $0 [--dry-run] [--yes] [--update] [--with-claude] <путь-к-проекту>" \
-    "  --dry-run  показать изменения без их применения" \
-    "  --yes      создать отсутствующую директорию без вопроса" \
-    "  --update   обновить существующий проект, добавив только отсутствующие файлы" \
-    "  --with-claude  добавить CLAUDE.md с импортом AGENTS.md для совместимости"
+  printf '%s\n' "Usage: $0 [--dry-run] [--yes] [--update] [--with-claude] <project-path>" \
+    "  --dry-run  show changes without applying them" \
+    "  --yes      create a missing directory without prompting" \
+    "  --update   update an existing project by adding only missing files" \
+    "  --with-claude  add CLAUDE.md importing AGENTS.md for compatibility"
 }
 
 DRY_RUN=0
@@ -43,13 +43,13 @@ while [ "$#" -gt 0 ]; do
       break
       ;;
     -*)
-      printf 'Неизвестная опция: %s\n' "$1" >&2
+      printf 'Unknown option: %s\n' "$1" >&2
       usage >&2
       exit 1
       ;;
     *)
       if [ -n "$TARGET_DIR" ]; then
-        printf 'Указан более чем один путь: %s\n' "$1" >&2
+        printf 'More than one path specified: %s\n' "$1" >&2
         exit 1
       fi
       TARGET_DIR="$1"
@@ -60,7 +60,7 @@ done
 
 if [ "$#" -gt 0 ]; then
   if [ -n "$TARGET_DIR" ]; then
-    printf 'Указан более чем один путь: %s\n' "$1" >&2
+    printf 'More than one path specified: %s\n' "$1" >&2
     exit 1
   fi
   TARGET_DIR="$1"
@@ -75,36 +75,36 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 STARTER_KIT_DIR="$(dirname "$SCRIPT_DIR")"
 
 if [ ! -f "$STARTER_KIT_DIR/AGENTS.md" ]; then
-  printf 'Не найден AGENTS.md стартер-кита: %s\n' "$STARTER_KIT_DIR" >&2
+  printf 'Starter Kit AGENTS.md not found: %s\n' "$STARTER_KIT_DIR" >&2
   exit 1
 fi
 
 if [ -e "$TARGET_DIR" ] && [ ! -d "$TARGET_DIR" ]; then
-  printf 'Путь существует и не является директорией: %s\n' "$TARGET_DIR" >&2
+  printf 'Path exists and is not a directory: %s\n' "$TARGET_DIR" >&2
   exit 1
 fi
 
 if [ "$UPDATE_MODE" -eq 1 ] && [ ! -d "$TARGET_DIR" ]; then
-  printf 'Режим --update требует существующую директорию проекта: %s\n' "$TARGET_DIR" >&2
+  printf 'The --update mode requires an existing project directory: %s\n' "$TARGET_DIR" >&2
   exit 1
 fi
 
 if [ ! -d "$TARGET_DIR" ]; then
   if [ "$DRY_RUN" -eq 1 ]; then
-    printf 'Dry-run: будет создана директория %s\n' "$TARGET_DIR"
+    printf 'Dry-run: would create directory %s\n' "$TARGET_DIR"
   elif [ "$ASSUME_YES" -eq 1 ]; then
     mkdir -p "$TARGET_DIR"
   elif [ -t 0 ]; then
-    printf 'Директория "%s" не существует. Создать? (y/n) ' "$TARGET_DIR"
+    printf 'Directory "%s" does not exist. Create it? (y/n) ' "$TARGET_DIR"
     read -r answer
     if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
       mkdir -p "$TARGET_DIR"
     else
-      printf 'Отменено.\n'
+      printf 'Cancelled.\n'
       exit 0
     fi
   else
-    printf 'Директория не существует. Используйте --yes для неинтерактивного создания.\n' >&2
+    printf 'Directory does not exist. Use --yes to create it non-interactively.\n' >&2
     exit 1
   fi
 fi
@@ -137,38 +137,38 @@ trap cleanup_on_exit EXIT
 
 if [ -e "$TARGET_DIR/AGENTS.md" ] || [ -L "$TARGET_DIR/AGENTS.md" ]; then
   if [ ! -f "$TARGET_DIR/AGENTS.md" ] && [ ! -L "$TARGET_DIR/AGENTS.md" ]; then
-    printf 'Путь AGENTS.md существует и не является файлом: %s\n' "$TARGET_DIR/AGENTS.md" >&2
+    printf 'AGENTS.md path exists and is not a file: %s\n' "$TARGET_DIR/AGENTS.md" >&2
     exit 1
   fi
 fi
 
 if [ -e "$TARGET_DIR/.gitignore" ] || [ -L "$TARGET_DIR/.gitignore" ]; then
   if [ ! -f "$TARGET_DIR/.gitignore" ] && [ ! -L "$TARGET_DIR/.gitignore" ]; then
-    printf 'Путь .gitignore существует и не является файлом: %s\n' "$TARGET_DIR/.gitignore" >&2
+    printf '.gitignore path exists and is not a file: %s\n' "$TARGET_DIR/.gitignore" >&2
     exit 1
   fi
 fi
 
 if [ -L "$TARGET_DIR/docs" ]; then
-  printf 'Симлинк на docs не поддерживается: %s\n' "$TARGET_DIR/docs" >&2
+  printf 'A symlinked docs directory is not supported: %s\n' "$TARGET_DIR/docs" >&2
   exit 1
 fi
 
 if [ -e "$TARGET_DIR/docs" ] || [ -L "$TARGET_DIR/docs" ]; then
   if [ ! -d "$TARGET_DIR/docs" ]; then
-    printf 'Путь docs существует и не является диреторией: %s\n' "$TARGET_DIR/docs" >&2
+    printf 'docs path exists and is not a directory: %s\n' "$TARGET_DIR/docs" >&2
     exit 1
   fi
 fi
 
 if [ -L "$TARGET_DIR/scripts" ]; then
-  printf 'Симлинк на scripts не поддерживается: %s\n' "$TARGET_DIR/scripts" >&2
+  printf 'A symlinked scripts directory is not supported: %s\n' "$TARGET_DIR/scripts" >&2
   exit 1
 fi
 
 if [ -e "$TARGET_DIR/scripts" ] || [ -L "$TARGET_DIR/scripts" ]; then
   if [ ! -d "$TARGET_DIR/scripts" ]; then
-    printf 'Путь scripts существует и не является диреторией: %s\n' "$TARGET_DIR/scripts" >&2
+    printf 'scripts path exists and is not a directory: %s\n' "$TARGET_DIR/scripts" >&2
     exit 1
   fi
 fi
@@ -178,7 +178,7 @@ for doc in "$STARTER_KIT_DIR/docs/"*; do
   destination="$TARGET_DIR/docs/$(basename "$doc")"
   if [ -e "$destination" ] || [ -L "$destination" ]; then
     if [ ! -f "$destination" ] && [ ! -L "$destination" ]; then
-      printf 'Путь документа существует и не является файлом: %s\n' "$destination" >&2
+      printf 'Document path exists and is not a file: %s\n' "$destination" >&2
       exit 1
     fi
   fi
@@ -188,7 +188,7 @@ for tool in verify-project.sh security-scan.sh; do
   destination="$TARGET_DIR/scripts/$tool"
   if [ -e "$destination" ] || [ -L "$destination" ]; then
     if [ ! -f "$destination" ] && [ ! -L "$destination" ]; then
-      printf 'Путь инструмента существует и не является файлом: %s\n' "$destination" >&2
+      printf 'Tool path exists and is not a file: %s\n' "$destination" >&2
       exit 1
     fi
   fi
@@ -202,9 +202,9 @@ for marker in AGENTS.md CLAUDE.md docs scripts .github/workflows .gitlab-ci.yml 
   fi
 done
 
-printf 'Режим: %s\n' "$([ "$UPDATE_MODE" -eq 1 ] && printf 'обновление' || printf 'инициализация')"
-printf 'Трек-кандидат: %s\n' "$PROJECT_KIND"
-printf 'Целевой проект: %s\n' "$TARGET_DIR"
+printf 'Mode: %s\n' "$([ "$UPDATE_MODE" -eq 1 ] && printf 'update' || printf 'initialization')"
+printf 'Candidate track: %s\n' "$PROJECT_KIND"
+printf 'Target project: %s\n' "$TARGET_DIR"
 
 copy_if_missing() {
   source_path="$1"
@@ -212,57 +212,57 @@ copy_if_missing() {
   destination_name="$(basename "$destination_path")"
 
   if [ -e "$destination_path" ] || [ -L "$destination_path" ]; then
-    printf 'Сохранено: %s\n' "$destination_name"
+    printf 'Preserved: %s\n' "$destination_name"
     return 0
   fi
 
   if [ "$DRY_RUN" -eq 1 ]; then
-    printf 'Будет добавлено: %s\n' "$destination_name"
+    printf 'Would add: %s\n' "$destination_name"
     return 0
   fi
 
   CREATED_PATHS+=("$destination_path")
   cp "$source_path" "$destination_path"
-  printf 'Добавлено: %s\n' "$destination_name"
+  printf 'Added: %s\n' "$destination_name"
 }
 
 if [ ! -d "$TARGET_DIR/docs" ]; then
   if [ "$DRY_RUN" -eq 1 ]; then
-    printf 'Будет создано: docs/\n'
+    printf 'Would create: docs/\n'
   else
     CREATED_PATHS+=("$TARGET_DIR/docs")
     mkdir -p "$TARGET_DIR/docs"
-    printf 'Создано: docs/\n'
+    printf 'Created: docs/\n'
   fi
 else
-  printf 'Сохранено: docs/\n'
+  printf 'Preserved: docs/\n'
 fi
 
 copy_if_missing "$STARTER_KIT_DIR/AGENTS.md" "$TARGET_DIR/AGENTS.md"
 copy_if_missing "$STARTER_KIT_DIR/.gitignore" "$TARGET_DIR/.gitignore"
 
 if [ -e "$TARGET_DIR/CLAUDE.md" ] || [ -L "$TARGET_DIR/CLAUDE.md" ]; then
-  printf 'Сохранено существующее CLAUDE.md без изменений\n'
+  printf 'Preserved existing CLAUDE.md unchanged\n'
 elif [ "$WITH_CLAUDE" -eq 1 ]; then
   if [ "$DRY_RUN" -eq 1 ]; then
-    printf 'Будет добавлено: CLAUDE.md с импортом AGENTS.md\n'
+    printf 'Would add: CLAUDE.md importing AGENTS.md\n'
   else
     (set -o noclobber; printf '@AGENTS.md\n' >"$TARGET_DIR/CLAUDE.md")
     CREATED_PATHS+=("$TARGET_DIR/CLAUDE.md")
-    printf 'Добавлено: CLAUDE.md с импортом AGENTS.md\n'
+    printf 'Added: CLAUDE.md importing AGENTS.md\n'
   fi
 fi
 
 if [ ! -d "$TARGET_DIR/scripts" ]; then
   if [ "$DRY_RUN" -eq 1 ]; then
-    printf 'Будет создано: scripts/\n'
+    printf 'Would create: scripts/\n'
   else
     CREATED_PATHS+=("$TARGET_DIR/scripts")
     mkdir -p "$TARGET_DIR/scripts"
-    printf 'Создано: scripts/\n'
+    printf 'Created: scripts/\n'
   fi
 else
-  printf 'Сохранено: scripts/\n'
+  printf 'Preserved: scripts/\n'
 fi
 
 for tool in verify-project.sh security-scan.sh; do
@@ -274,10 +274,10 @@ for doc in "$STARTER_KIT_DIR/docs/"*; do
   copy_if_missing "$doc" "$TARGET_DIR/docs/$(basename "$doc")"
 done
 
-printf '\nПроверьте результат и запустите протокол онбординга агентом:\n'
-printf '  1. Изучите docs/onboarding-protocol.md.\n'
-printf '  2. Для Brownfield просканируйте манифесты, lockfiles, тесты и документацию.\n'
-printf '  3. Для Greenfield ответьте только на вопросы, которые нельзя вывести из файлов.\n'
-printf '  4. Создайте scripts/verification-profile.tsv на основе docs/verification-profile.example.tsv.\n'
-printf '  5. Попросите агента заполнить AGENTS.md и показать отчёт перед подтверждением.\n'
-printf '\nСуществующие проектные файлы не перезаписываются.\n'
+printf '\nReview the result and have an agent run the onboarding protocol:\n'
+printf '  1. Read docs/onboarding-protocol.md.\n'
+printf '  2. For Brownfield projects, inspect manifests, lockfiles, tests, and documentation.\n'
+printf '  3. For Greenfield projects, answer only questions that cannot be resolved from files.\n'
+printf '  4. Create scripts/verification-profile.tsv based on docs/verification-profile.example.tsv.\n'
+printf '  5. Ask the agent to complete AGENTS.md and present a report before approval.\n'
+printf '\nExisting project files are not overwritten.\n'

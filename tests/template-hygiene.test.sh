@@ -8,9 +8,25 @@ fail() {
   exit 1
 }
 
-for path in .gitignore .github/workflows/verification.yml AGENTS.md README.md README.ru.md docs/architecture.md docs/lifecycle.md docs/theme-tokens.md docs/verification.md scripts/init-project.sh scripts/verify-project.sh scripts/security-scan.sh; do
+for path in .gitignore .github/workflows/verification.yml AGENTS.md README.md docs/architecture.md docs/lifecycle.md docs/theme-tokens.md docs/verification.md scripts/init-project.sh scripts/verify-project.sh scripts/security-scan.sh; do
   [ -e "$ROOT/$path" ] || fail "missing required file: $path"
 done
+
+[ ! -e "$ROOT/README.ru.md" ] && [ ! -L "$ROOT/README.ru.md" ] || fail 'obsolete Russian README is present'
+
+# Check UTF-8 Cyrillic (U+0400–U+052F) in the C locale so the result does not
+# depend on the UTF-8 locales available on the machine or CI runner.
+cyrillic_pattern=$'[\xD0-\xD3][\x80-\xBF]|\xD4[\x80-\xAF]'
+while IFS= read -r -d '' path; do
+  if LC_ALL=C grep -qE "$cyrillic_pattern" "$path"; then
+    fail "Cyrillic text in English-only file: ${path#"$ROOT/"}"
+  else
+    [ "$?" -eq 1 ] || fail "could not check language: $path"
+  fi
+done < <(
+  printf '%s\0' "$ROOT/AGENTS.md" "$ROOT/README.md" "$ROOT/CHANGELOG.md"
+  find "$ROOT/docs" "$ROOT/scripts" "$ROOT/tests" -type f \( -name '*.md' -o -name '*.tsv' -o -name '*.sh' \) -print0
+)
 
 for zone in 1 2 3; do
   grep -q "^| Zone $zone |" "$ROOT/AGENTS.md" || fail "missing delegation zone: $zone"

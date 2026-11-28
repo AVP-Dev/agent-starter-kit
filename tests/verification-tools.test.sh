@@ -212,8 +212,8 @@ mkdir "$TMP_ROOT/greenfield"
 git -C "$TMP_ROOT/greenfield" init -q
 printf '# Fresh repository\n' >"$TMP_ROOT/greenfield/README.md"
 assert_status 0 "$ROOT/scripts/init-project.sh" --dry-run --with-claude "$TMP_ROOT/greenfield"
-assert_contains "$TMP_ROOT/command-output" 'Трек-кандидат: greenfield'
-assert_contains "$TMP_ROOT/command-output" 'CLAUDE.md с импортом AGENTS.md'
+assert_contains "$TMP_ROOT/command-output" 'Candidate track: greenfield'
+assert_contains "$TMP_ROOT/command-output" 'CLAUDE.md importing AGENTS.md'
 [ ! -e "$TMP_ROOT/greenfield/CLAUDE.md" ] || fail 'Dry-run created CLAUDE.md'
 assert_status 0 "$ROOT/scripts/init-project.sh" "$TMP_ROOT/greenfield"
 [ ! -e "$TMP_ROOT/greenfield/CLAUDE.md" ] && [ ! -L "$TMP_ROOT/greenfield/CLAUDE.md" ] || fail 'Default install added CLAUDE.md'
@@ -225,7 +225,7 @@ for path in AGENTS.md CLAUDE.md docs/architecture.md .github/workflows/verificat
   printf 'existing %s\n' "$path" >"$TMP_ROOT/brownfield/$path"
 done
 assert_status 0 "$ROOT/scripts/init-project.sh" --update --with-claude "$TMP_ROOT/brownfield"
-assert_contains "$TMP_ROOT/command-output" 'Трек-кандидат: brownfield'
+assert_contains "$TMP_ROOT/command-output" 'Candidate track: brownfield'
 for path in AGENTS.md CLAUDE.md docs/architecture.md .github/workflows/verification.yml; do
   [ "$(<"$TMP_ROOT/brownfield/$path")" = "existing $path" ] || fail "Modified existing $path"
 done

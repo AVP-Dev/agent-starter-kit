@@ -1,15 +1,15 @@
-# Глоссарий предметной области
+# Domain Glossary
 
-> Единый словарь терминов проекта. Исключает путаницу в именовании сущностей в коде, базе данных и документации.
+> A single vocabulary of project terms. Prevents naming ambiguity across code, database, and documentation.
 
-| Термин (RU) | Term (EN) | Определение и контекст использования |
+| Term | Code / Technology | Definition and Usage Context |
 |---|---|---|
-| **Пользователь** | `User` | Зарегистрированная учетная запись с определенным набором ролей. |
-| **Тенант / Проект** | `Tenant / Project` | Изолированное рабочее пространство или сайт внутри мульти-тенантной системы. |
-| **Задача в очереди** | `Job / Task` | Единица асинхронной работы в очереди BullMQ / Redis. |
-| **Контракт** | `Contract / DTO` | Строго типизированная структура данных интерфейса обмена (Zod, Pydantic, TypeScript interface). |
-| **Инвариант** | `Invariant` | Условие или ограничение системы, которое не может быть нарушено ни при каких обстоятельствах. |
-| **Векторный индекс** | `pgvector / HNSW` | Расширение PostgreSQL и структура графового индекса (Hierarchical Navigable Small World) для сверхбыстрого семантического поиска эмбеддингов в RAG. |
-| **Гейт верификации** | `Verification Gate` | Обязательный автоматический запуск `typecheck`, `lint` и `test` перед завершением задачи с требованием кода возврата 0. |
-| **PaaS деплой** | `Coolify / Dokploy` | Self-hosted платформы управления контейнерами и деплоем на базе Docker / Linux. |
-| **Документационный агент** | `Context7 MCP` | Протокол и инструмент для извлечения актуальной официальной документации библиотек во избежание галлюцинаций устаревших API. |
+| **User** | `User` | A registered account with a defined set of roles. |
+| **Tenant / Project** | `Tenant / Project` | An isolated workspace or site within a multi-tenant system. |
+| **Queued Job** | `Job / Task` | A unit of asynchronous work in a BullMQ / Redis queue. |
+| **Contract** | `Contract / DTO` | A strictly typed data structure for an exchange interface (Zod, Pydantic, TypeScript interface). |
+| **Invariant** | `Invariant` | A system condition or constraint that must not be violated under any circumstances. |
+| **Vector Index** | `pgvector / HNSW` | A PostgreSQL extension and graph index structure (Hierarchical Navigable Small World) for high-speed semantic embedding search in RAG. |
+| **Verification Gate** | `Verification Gate` | Mandatory automated execution of `typecheck`, `lint`, and `test` before task completion, requiring exit code 0. |
+| **PaaS Deployment** | `Coolify / Dokploy` | Self-hosted container and deployment management platforms based on Docker / Linux. |
+| **Documentation Agent** | `Context7 MCP` | A protocol and tool for retrieving current official library documentation to avoid hallucinations of outdated APIs. |

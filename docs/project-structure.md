@@ -1,60 +1,60 @@
-# Структура проекта и гигиена файлов
+# Project Structure and File Hygiene
 
-> **Назначение:** поддерживать проекты читаемыми, локальными и предсказуемыми без привязки к конкретному языку, фреймворку или размеру команды.
+> **Purpose:** Keep projects readable, localized, and predictable, regardless of language, framework, or team size.
 >
-> **Граница:** документ задаёт принципы и мягкие ориентиры. Проект может зафиксировать собственные conventions в `AGENTS.md` или DESIGN-манифесте.
+> **Boundary:** This document defines principles and flexible guidelines. A project may define its own conventions in `AGENTS.md` or its DESIGN manifest.
 
-## 1. Главный принцип
+## 1. Core Principle
 
-Маленький файл с одной ответственностью, явное имя, локальная реализация внутри владельца и централизация только настоящих общих контрактов.
+Small files with a single responsibility, explicit names, implementation kept within its owner, and centralization only for genuinely shared contracts.
 
-Большой проект не становится чистым от количества документации. Чистота достигается, когда границы файлов, каталогов и зависимостей можно объяснить без чтения всей кодовой базы.
+A large project does not become clean simply by accumulating documentation. Cleanliness comes from file, directory, and dependency boundaries that can be explained without reading the entire codebase.
 
-## 2. Размер файлов
+## 2. File Size
 
-Для рукописного исходного кода 300–500 строк — ориентир. При 500–800 строках и выше оцени, можно ли выделить самостоятельную ответственность. Оставь связный файл целым, если разбиение разносит один сценарий по нескольким файлам или усложняет проверку. Число строк само по себе не требует исключения, отчёта или плана рефакторинга.
+For handwritten source code, 300–500 lines is a guideline. At 500–800 lines or more, assess whether a distinct responsibility can be extracted. Keep a cohesive file intact if splitting it would spread one use case across several files or complicate verification. Line count alone does not require an exception, a report, or a refactoring plan.
 
-Для генерируемых файлов, lockfiles, миграций, схем, snapshots и тестовых данных размер определяет их формат и назначение. В существующем проекте учитывай его соглашения и область текущей задачи.
+For generated files, lockfiles, migrations, schemas, snapshots, and test data, their format and purpose determine their size. In an existing project, respect its conventions and the scope of the current task.
 
-## 3. Одна ответственность на файл
+## 3. One Responsibility per File
 
-Файл не должен становиться контейнером для всего, что «относится к проекту».
+A file should not become a container for everything that "relates to the project."
 
-Нежелательны:
+Avoid:
 
-- `utils.ts` и `helpers.ts` без конкретной области;
+- `utils.ts` and `helpers.ts` without a specific scope;
 - `misc/`, `stuff/`, `common/`, `final/`, `new/`;
-- смешивание API, валидации, БД, UI и бизнес-логики;
-- несколько unrelated responsibilities в одном diff;
-- файлы, которые одновременно являются registry, implementation и документацией.
+- Mixing APIs, validation, databases, UI, and business logic;
+- Multiple unrelated responsibilities in a single diff;
+- Files that simultaneously serve as registries, implementations, and documentation.
 
-Если файл трудно назвать одной фразой, его нужно разделить по ответственности, а не механически по числу строк.
+If a file is hard to describe in one phrase, split it by responsibility, not mechanically by line count.
 
-## 4. Именование
+## 4. Naming
 
-Имя файла, каталога, типа и функции должно отвечать на вопрос «что это делает», а не «кто или когда его создал».
+The name of a file, directory, type, or function should answer "what does this do," not "who created it or when."
 
-Хорошие ориентиры:
+Good examples:
 
-- `invoice-validation.ts` — проверяет контракт счёта;
-- `tenant-scope.ts` — отвечает за границы tenant;
-- `payment-provider.ts` — изолирует внешнего провайдера;
-- `billing-invoice-service.ts` — владеет сценарием счёта.
+- `invoice-validation.ts` — validates the invoice contract;
+- `tenant-scope.ts` — manages tenant boundaries;
+- `payment-provider.ts` — isolates an external provider;
+- `billing-invoice-service.ts` — owns the invoice use case.
 
-Не использовать `new`, `final`, `latest`, `common`, `misc` и временные имена в постоянном коде. Стиль регистра и разделителей определяется языком проекта и фиксируется один раз.
+Do not use `new`, `final`, `latest`, `common`, `misc`, or temporary names in permanent code. The project's language determines casing and separator conventions; define them once.
 
-## 5. Каталоги и ownership
+## 5. Directories and Ownership
 
-Каталог должен иметь одну понятную ответственность и владельца. Рекомендуемая нейтральная карта:
+A directory should have a single clear responsibility and owner. Recommended neutral layout:
 
 ```text
 src/
 ├── app/                 # composition, routes, application entrypoints
-├── modules/             # изолированные доменные модули
-├── shared/              # стабильные общие контракты и схемы
-├── workers/             # фоновые процессы
-├── infrastructure/      # внешние адаптеры и инфраструктура
-└── generated/           # generated code, если проект его допускает
+├── modules/             # isolated domain modules
+├── shared/              # stable shared contracts and schemas
+├── workers/             # background processes
+├── infrastructure/      # external adapters and infrastructure
+└── generated/           # generated code, if permitted by the project
 
 tests/
 docs/
@@ -62,32 +62,32 @@ scripts/
 migrations/
 ```
 
-Структура не является обязательным шаблоном: Brownfield-проект сначала описывает свою реальную карту, затем при необходимости добавляет недостающие зоны.
+This structure is not a mandatory template: a Brownfield project first documents its actual layout and then adds missing areas if needed.
 
-## 6. Централизация
+## 6. Centralization
 
-Централизовать следует стабильные контракты:
+Centralize stable contracts:
 
-- DTO и API/worker contracts;
-- схемы валидации;
-- error codes и event contracts;
-- config schema;
-- общие типы;
-- test fixtures, если они действительно общие.
+- DTOs and API/worker contracts;
+- Validation schemas;
+- Error codes and event contracts;
+- Configuration schemas;
+- Shared types;
+- Test fixtures, if genuinely shared.
 
-Локальные детали остаются внутри модуля:
+Local details stay within their module:
 
-- приватные SQL-запросы;
-- UI-компоненты;
-- доменные исключения;
-- локальные utility-функции;
-- конфигурация одного модуля.
+- Private SQL queries;
+- UI components;
+- Domain exceptions;
+- Local utility functions;
+- Configuration for a single module.
 
-Код переносится в `shared` только при наличии минимум двух независимых стабильных потребителей. Нельзя создавать `shared` как свалку для кода, который пока не удалось классифицировать.
+Move code to `shared` only when it has at least two independent, stable consumers. Do not create `shared` as a dumping ground for code that has not yet been classified.
 
-## 7. Направление зависимостей
+## 7. Dependency Direction
 
-Предпочтительное направление:
+Preferred direction:
 
 ```text
 app → modules → shared contracts
@@ -95,48 +95,48 @@ app → infrastructure
 workers → modules/contracts
 ```
 
-Модуль не импортирует приватные таблицы, внутренние файлы или состояние другого модуля. Межмодульные обращения проходят через контракты, сервисы или события Skeleton.
+A module does not import another module's private tables, internal files, or state. Cross-module communication flows through contracts, services, or Skeleton events.
 
-Циклы и неявные зависимости проверяются проектными линтерами или import-boundary checks. Массовый рефакторинг для исправления структуры выполняется только после DESIGN-манифеста.
+Use project linters or import-boundary checks to detect cycles and implicit dependencies. Large-scale refactoring to correct the structure requires a DESIGN manifest first.
 
-## 8. Тесты и артефакты
+## 8. Tests and Artifacts
 
-- Тесты повторяют логические границы модулей, а не смешивают unit, integration и e2e в одном файле.
-- Fixtures и factories имеют явный owner.
-- Generated code, snapshots и lockfiles не редактируются вручную.
-- Временные файлы и scratch-артефакты не попадают в канонический source scope.
-- Один файл не должен содержать несвязанные наборы тестов только ради уменьшения количества файлов.
+- Tests follow logical module boundaries rather than mixing unit, integration, and end-to-end tests in one file.
+- Fixtures and factories have an explicit owner.
+- Generated code, snapshots, and lockfiles are not edited manually.
+- Temporary files and scratch artifacts are excluded from the canonical source scope.
+- A single file should not contain unrelated test suites solely to reduce the number of files.
 
-## 9. Когда нужен refactor
+## 9. When Refactoring Is Needed
 
-Рефакторинг структуры рассматривается, если:
+Consider structural refactoring if:
 
-- файл пересекает несколько ответственностей;
-- один модуль зависит от внутренностей другого;
-- одинаковая логика дублируется в нескольких независимых ветках;
-- размер или imports делают безопасную работу невозможной;
-- ownership каталога больше нельзя объяснить.
+- A file spans multiple responsibilities;
+- One module depends on another module's internals;
+- The same logic is duplicated across multiple independent branches;
+- File size or imports prevent safe work;
+- Directory ownership can no longer be explained.
 
-Для крупного структурного изменения зафиксируй границы, влияние и способ проверки. Массовую чистку согласуй отдельной задачей.
+For a major structural change, document the boundaries, impact, and verification method. Approve large-scale cleanup as a separate task.
 
-## 10. Онбординг и обновление
+## 10. Onboarding and Updates
 
-При подключении Кита агент:
+When integrating the Kit, the agent:
 
-1. строит фактическую карту каталогов и ownership;
-2. отмечает крупные и дублирующиеся файлы, если их структура мешает работе;
-3. проверяет shared-код и направления зависимостей;
-4. сохраняет принятые границы и имена;
-5. предлагает отдельные небольшие refactor-задачи;
-6. сохраняет проектные conventions в `AGENTS.md` или DESIGN-манифесте.
+1. Builds an accurate directory and ownership map;
+2. Identifies large and duplicate files if their structure impedes work;
+3. Reviews shared code and dependency directions;
+4. Preserves established boundaries and names;
+5. Proposes separate, small refactoring tasks;
+6. Records project conventions in `AGENTS.md` or the DESIGN manifest.
 
-## 11. Review checklist
+## 11. Review Checklist
 
-- [ ] У каждого существенного файла есть одна понятная ответственность.
-- [ ] Имена описывают назначение, а не временную историю.
-- [ ] Shared-код имеет минимум два независимых потребителя.
-- [ ] Нет circular или скрытых межмодульных зависимостей.
-- [ ] Один owner отвечает за канонические документы модуля.
-- [ ] Границы и размер затронутых файлов позволяют безопасно читать, менять и проверять код.
-- [ ] Generated, test и production-артефакты не смешаны.
-- [ ] Структурный refactor отделён от функционального изменения.
+- [ ] Each substantial file has one clear responsibility.
+- [ ] Names describe purpose, not temporary history.
+- [ ] Shared code has at least two independent consumers.
+- [ ] There are no circular or hidden cross-module dependencies.
+- [ ] One owner is responsible for each module's canonical documents.
+- [ ] Boundaries and size of the affected files allow safe reading, editing, and verification.
+- [ ] Generated, test, and production artifacts are not mixed.
+- [ ] Structural refactoring is separate from functional changes.
