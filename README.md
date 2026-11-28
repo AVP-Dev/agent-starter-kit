@@ -1,10 +1,8 @@
 # Agent Starter Kit: AI Engineering Standard (2026 Edition)
 
-**English** | [Русская версия](README.ru.md)
-
 [![Verification Gate](https://github.com/AVP-Dev/agent-starter-kit/actions/workflows/verification.yml/badge.svg)](https://github.com/AVP-Dev/agent-starter-kit/actions/workflows/verification.yml)
 
-The starter kit helps adapt engineering guidance and automated checks to new and existing projects. The templates are written in Russian and can be localized during onboarding.
+The starter kit helps adapt engineering guidance and automated checks to new and existing projects. English is the kit's sole maintained language; target projects can adapt the templates during onboarding.
 
 - [AGENTS.md](https://agents.md/) is the primary instruction file. Loading and precedence depend on the client and settings.
 - Claude Code can load `AGENTS.md` directly when supported by the installed version and instruction settings. By default, an existing `CLAUDE.md` or `CLAUDE.local.md` in the working directory or above takes precedence. Use `--with-claude` to add a missing `CLAUDE.md` with `@AGENTS.md`; if one already exists, preserve its content and add the import only when needed. Verify loaded instructions against the [Claude Code documentation](https://code.claude.com/docs/en/memory#agentsmd).
@@ -14,11 +12,11 @@ The starter kit helps adapt engineering guidance and automated checks to new and
 ## 📖 Deep-Dive Article Series
 
 This starter kit is the practical implementation of the AI engineering methodology published in the essay series:
-👉 **[Code Got Cheap. Engineering Thought Did Not (AVPDev Blog)](https://avpdev.com/ru/blog/control-ideas-not-code/)**
+👉 **[Code Became Cheap. Engineering Thinking Did Not (AVPDev Blog)](https://avpdev.com/en/blog/control-ideas-not-code/)**
 
-- **Part 1:** [Code Got Cheap. Engineering Thought Did Not](https://avpdev.com/ru/blog/control-ideas-not-code/) — Shifting from syntax-level coding to architectural control, system invariants, and intent management.
-- **Part 2:** [AI Loves Straight Roads: Why Local Optimization Breaks Complex Systems](https://avpdev.com/ru/blog/ai-loves-straight-roads/) — Why removing architectural fences, queues, and boundaries creates technical debt even when local tests are green.
-- **Part 3:** [Architect of the Future: From Line-by-Line Review to Design Review](https://avpdev.com/ru/blog/architect-of-the-future/) — The `Skeleton + Pluggable Modules` pattern, `DESIGN.md` / Design Review, delegation boundaries, and the architect’s responsibility for system integrity.
+- **Part 1:** [Code Became Cheap. Engineering Thinking Did Not](https://avpdev.com/en/blog/control-ideas-not-code/) — Shifting from syntax-level coding to architectural control, system invariants, and intent management.
+- **Part 2:** [AI Loves Straight Roads: Why Local Optimization Breaks Complex Systems](https://avpdev.com/en/blog/ai-loves-straight-roads/) — Why removing architectural fences, queues, and boundaries creates technical debt even when local tests are green.
+- **Part 3:** [The Architect of the Future: From Line Reviews to Design Reviews](https://avpdev.com/en/blog/architect-of-the-future/) — The `Skeleton + Pluggable Modules` pattern, `DESIGN.md` / Design Review, delegation boundaries, and the architect’s responsibility for system integrity.
 
 ---
 
@@ -48,8 +46,7 @@ agent-starter-kit/
 │   ├── security-scan.sh           # Dependency-free secret baseline scanner
 │   └── verification-profile.tsv   # This kit's runnable gate; not copied to targets
 ├── CHANGELOG.md                   # Kit version history and releases
-├── README.md                      # English documentation (this file)
-└── README.ru.md                   # Russian documentation
+└── README.md                      # Project documentation
 ```
 
 ---

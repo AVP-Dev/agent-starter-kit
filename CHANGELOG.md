@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Adopted English as the sole maintained language for documentation, agent instructions, templates, CLI output, and examples; removed the legacy Russian README.
 - Made file size, report length, routing, and documentation effort proportional to the project and task.
 - Made the Claude Code import opt-in with `--with-claude`. Existing instruction files are preserved.
 

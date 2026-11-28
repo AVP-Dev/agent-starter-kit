@@ -1,22 +1,22 @@
-# Автоматический протокол онбординга проекта (Agent Onboarding Protocol)
+# Automated Project Onboarding Protocol (Agent Onboarding Protocol)
 
-> **Назначение:** подключить или обновить AI Engineering Standard в новом, существующем или уже обновляемом проекте без удаления и молчаливого перезаписывания проектных данных.
+> **Purpose:** Integrate or update the AI Engineering Standard in a new, existing, or already updating project without deleting or silently overwriting project data.
 >
-> **Граница:** протокол не создаёт собственный runtime-оркестратор. Он управляет сканированием, заполнением документации и безопасным добавлением недостающих файлов.
+> **Boundary:** The protocol does not create its own runtime orchestrator. It manages scanning, documentation completion, and the safe addition of missing files.
 
-## 1. Режимы работы
+## 1. Operating Modes
 
-Протокол поддерживает три режима:
+The protocol supports three modes:
 
-- **Автоматический:** агент сам извлекает факты из манифестов, lockfile, конфигурации, тестов и документации; задаёт вопросы только о решениях, которые нельзя вывести из репозитория.
-- **Полуавтоматический:** агент заполняет обнаруженные факты, а спорные или архитектурные развилки оставляет пользователю с рекомендацией.
-- **Ручной:** пользователь заполняет или исправляет поля вручную; агент не перезаписывает ручные значения без подтверждения.
+- **Automatic:** The agent extracts facts from manifests, lockfiles, configuration, tests, and documentation; it asks questions only about decisions that cannot be inferred from the repository.
+- **Semi-automatic:** The agent fills in the facts it discovers and leaves disputed or architectural decisions to the user with a recommendation.
+- **Manual:** The user fills in or corrects fields manually; the agent does not overwrite manual values without confirmation.
 
-Для brownfield-проекта приоритет имеет фактическое состояние репозитория. Для greenfield-проекта приоритет имеет подтверждённое решение пользователя, а не догадка агента. Независимые проверки можно делегировать, если это ускоряет работу или повышает качество отчёта.
+For a brownfield project, the actual repository state takes precedence. For a greenfield project, the user's confirmed decision takes precedence over the agent's assumptions. Independent checks may be delegated if doing so speeds up the work or improves report quality.
 
-## 2. Безопасная подготовка через скрипт
+## 2. Safe Preparation with the Script
 
-Скрипт `scripts/init-project.sh` только подготавливает структуру, определяет heuristic track candidate и добавляет отсутствующие стандартные файлы. Он не выполняет глубокий анализ проекта и не принимает архитектурные решения.
+The `scripts/init-project.sh` script only prepares the structure, identifies a heuristic track candidate, and adds missing standard files. It does not perform deep project analysis or make architectural decisions.
 
 ```bash
 ./scripts/init-project.sh /path/to/project
@@ -26,208 +26,208 @@
 ./scripts/init-project.sh --with-claude /path/to/project
 ```
 
-Опции:
+Options:
 
-- `--dry-run` — показать, что будет добавлено, ничего не изменять;
-- `--yes` — создать отсутствующую целевую директорию без интерактивного вопроса;
-- `--update` — обновить существующий проект: безопасно добавить только отсутствующие файлы и показать, какие существующие файлы сохранены. Для несуществующего пути режим отклоняется.
+- `--dry-run` — show what will be added without making changes;
+- `--yes` — create a missing target directory without an interactive prompt;
+- `--update` — update an existing project: safely add only missing files and report which existing files were preserved. This mode rejects nonexistent paths.
 
-Скрипт сохраняет существующие `AGENTS.md`, `CLAUDE.md`, `.gitignore`, `docs/*` и инструменты в `scripts/`. По умолчанию он опирается на `AGENTS.md`. Флаг `--with-claude` добавляет отсутствующий `CLAUDE.md` с импортом `@AGENTS.md` для старых версий или окружений, где прямая загрузка отключена. Симлинки на каталоги `docs/` и `scripts/` отклоняются. Настройка CI целевого проекта выполняется отдельно.
+The script preserves existing `AGENTS.md`, `CLAUDE.md`, `.gitignore`, `docs/*`, and tools in `scripts/`. It relies on `AGENTS.md` by default. The `--with-claude` flag adds a missing `CLAUDE.md` with an `@AGENTS.md` import for older versions or environments where direct loading is disabled. Symlinks to the `docs/` and `scripts/` directories are rejected. Configure the target project's CI separately.
 
-## 3. Команды для агента
+## 3. Agent Prompts
 
-### Автоматический brownfield
-
-```text
-Выполни протокол онбординга из docs/onboarding-protocol.md.
-Изучи текущий репозиторий, определи Brownfield, извлеки фактический стек,
-структуру, команды проверки и существующие документы.
-Подготовь неразрушающее обновление AGENTS.md и docs/.
-Не задавай вопросы о фактах, которые видны из файлов. Покажи краткий отчёт
-о найденном, сохранённом, добавленном и требующем решения.
-```
-
-### Автоматический greenfield
+### Automatic Brownfield
 
 ```text
-Выполни протокол онбординга из docs/onboarding-protocol.md для нового проекта.
-Определи, какие факты уже заданы, задай только недостающие развилки с
-рекомендациями, затем заполни документацию подтверждёнными значениями.
-Не создавай лишний код, runtime или платформенные адаптеры.
-Покажи итоговое резюме перед применением необратимых изменений.
+Follow the onboarding protocol in docs/onboarding-protocol.md.
+Inspect the current repository, identify it as Brownfield, and extract the actual
+stack, structure, verification commands, and existing documents.
+Prepare a non-destructive update to AGENTS.md and docs/.
+Do not ask questions about facts visible in the files. Show a concise report of
+what was found, preserved, added, and remains to be decided.
 ```
 
-### Ручной режим
+### Automatic Greenfield
 
 ```text
-Подготовь шаблоны и список полей для ручного заполнения.
-Не анализируй архитектуру и не делай предположений без явного разрешения.
-После ручного заполнения проверь согласованность AGENTS.md и docs/.
+Follow the onboarding protocol in docs/onboarding-protocol.md for a new project.
+Identify the facts already established, ask only about unresolved decisions
+with recommendations, then complete the documentation with confirmed values.
+Do not create unnecessary code, runtimes, or platform adapters.
+Show a final summary before applying irreversible changes.
 ```
 
-### Обновление существующего проекта
+### Manual Mode
 
 ```text
-Выполни обновление AI Engineering Standard по docs/onboarding-protocol.md.
-Сначала прочитай существующие AGENTS.md, CLAUDE.md, README и docs/.
-Сохрани пользовательские правила и инженерные документы.
-Добавь только отсутствующие стандартные разделы и шаблоны.
-Не удаляй, не переименовывай и не затирай существующие файлы.
+Prepare templates and a list of fields to fill in manually.
+Do not analyze the architecture or make assumptions without explicit permission.
+After manual completion, check AGENTS.md and docs/ for consistency.
 ```
 
-## 4. Фаза 0. Проверка безопасности
+### Updating an Existing Project
 
-Перед изменением файлов агент обязан:
+```text
+Update the AI Engineering Standard according to docs/onboarding-protocol.md.
+Read the existing AGENTS.md, CLAUDE.md, README, and docs/ first.
+Preserve user rules and engineering documents.
+Add only missing standard sections and templates.
+Do not delete, rename, or overwrite existing files.
+```
 
-1. Определить корень проекта и границы репозитория.
-2. Проверить `git status` и наличие незакоммиченных изменений.
-3. Не выполнять pull, reset, checkout, удаление или перезапись файлов.
-4. Не копировать секреты, `.env`, ключи, токены и приватные данные в документацию.
-5. Определить, есть ли существующие `AGENTS.md`, `CLAUDE.md` и `docs/`.
-6. Зафиксировать список файлов, которые будут созданы или сохранены.
+## 4. Phase 0. Safety Check
 
-Если проект уже содержит изменения, агент не должен затирать их молча. Он сообщает о них и предлагает безопасный режим сканирования без изменения файлов.
+Before changing files, the agent must:
 
-## 5. Фаза 1. Определение трека
+1. Identify the project root and repository boundaries.
+2. Check `git status` for uncommitted changes.
+3. Do not pull, reset, checkout, delete, or overwrite files.
+4. Do not copy secrets, `.env` files, keys, tokens, or private data into documentation.
+5. Determine whether `AGENTS.md`, `CLAUDE.md`, and `docs/` already exist.
+6. Record the list of files that will be created or preserved.
+
+If the project already contains changes, the agent must not silently overwrite them. It reports them and proposes a safe scanning mode that does not modify files.
+
+## 5. Phase 1. Track Identification
 
 ### Brownfield
 
-Признаки существующего проекта:
+Indicators of an existing project:
 
-- есть `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml` или аналогичные манифесты;
-- есть lockfile, Dockerfile, CI-конфигурация, исходный код или тесты;
-- есть подтверждённые архитектурные решения или действующие проектные контракты.
+- It contains `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, or similar manifests;
+- It contains a lockfile, Dockerfile, CI configuration, source code, or tests;
+- It has confirmed architectural decisions or active project contracts.
 
-Агент извлекает:
+The agent extracts:
 
-- runtimes и языки;
-- package managers и lockfiles;
-- frontend, backend и инфраструктурные компоненты;
-- команды typecheck, lint, test, build и security checks;
-- baseline существующих проверок и ограничения окружения;
-- фактическую стадию эксплуатации, реальные данные, публичные контракты и условия восстановления;
-- структуру каталогов и существующие модули;
-- существующие правила, документацию и ограничения;
-- фактическую карту каталогов, ownership модулей, направления зависимостей и потенциально oversized/catch-all файлы.
+- Runtimes and languages;
+- Package managers and lockfiles;
+- Frontend, backend, and infrastructure components;
+- Typecheck, lint, test, build, and security check commands;
+- The baseline of existing checks and environment constraints;
+- The actual operational stage, real data, public contracts, and recovery conditions;
+- Directory structure and existing modules;
+- Existing rules, documentation, and restrictions;
+- The actual directory map, module ownership, dependency directions, and potentially oversized or catch-all files.
 
-Агент не спрашивает пользователя о фактах, которые можно прочитать из файлов.
+The agent does not ask the user about facts that can be read from the files.
 
 ### Greenfield
 
-Признаки нового проекта:
+Indicators of a new project:
 
-- каталог пуст или содержит только базовые файлы вроде `.git`, `.gitignore` и README с заголовком;
-- нет манифестов зависимостей, исходного кода и проверок;
-- нет фактического stack, который можно определить.
+- The directory is empty or contains only basic files such as `.git`, `.gitignore`, and a README with a heading;
+- There are no dependency manifests, source code, or checks;
+- There is no actual stack to identify.
 
-Агент задаёт только необходимые вопросы:
+The agent asks only necessary questions:
 
-1. Какова цель продукта и тип проекта?
-2. Какой минимальный стек выбрать?
-3. Если проект работает с данными нескольких организаций, какие требования к их изоляции?
-4. Какие проверки и ограничения нужно зафиксировать до начала разработки?
+1. What is the product's purpose and project type?
+2. What is the minimum stack to choose?
+3. If the project handles data from multiple organizations, what are the isolation requirements?
+4. What checks and constraints must be established before development begins?
 
-Для каждого вопроса агент предлагает рекомендуемый вариант и объясняет компромисс. Ответы пользователя записываются в ручные значения и имеют приоритет над defaults.
+For each question, the agent provides a recommended option and explains the tradeoff. The user's answers are recorded as manual values and take precedence over defaults.
 
-## 6. Фаза 2. Безопасное подключение стандарта
+## 6. Phase 2. Safe Integration of the Standard
 
-1. Запустить `init-project.sh` в dry-run, если нужно сначала увидеть изменения.
-2. Добавить недостающий `AGENTS.md` только если его нет.
-3. Определить, нужна ли совместимость через `--with-claude`. Сверить установленную версию и настройки Project instructions с [документацией Claude Code](https://code.claude.com/docs/en/memory#agentsmd): прямое чтение `AGENTS.md` зависит от поддержки и наличия файлов Claude в текущем и родительских каталогах. Если прямое чтение недоступно, добавь импорт `@AGENTS.md` в `CLAUDE.md` с сохранением существующего содержимого. После подключения проверь загруженные инструкции в новой сессии через `/context all`.
-4. Скопировать недостающий `.gitignore`; существующий `.gitignore` сохранить и дополнить агентом только после проверки его правил.
-5. Для ручного подключения выбрать применимые документы. Скрипт установки добавляет комплект недостающих документов и шаблон профиля из `docs/`, сохраняя одноимённые файлы.
-6. Для существующего `AGENTS.md` сохранить проектные правила и добавить только применимые ссылки или инструкции.
-7. Не создавать `.cursorrules`, `.windsurfrules` или другие дублирующие правила без явного запроса.
-8. Не создавать активный `scripts/verification-profile.tsv` вслепую. Добавить универсальные `scripts/verify-project.sh`, `scripts/security-scan.sh` и шаблон профиля, затем поручить агенту сформировать профиль только из подтверждённых команд конкретного проекта.
+1. Run `init-project.sh` in dry-run mode if changes need to be reviewed first.
+2. Add a missing `AGENTS.md` only if it does not exist.
+3. Determine whether compatibility through `--with-claude` is needed. Check the installed version and Project instructions settings against the [Claude Code documentation](https://code.claude.com/docs/en/memory#agentsmd): direct reading of `AGENTS.md` depends on support and the presence of Claude files in the current and parent directories. If direct reading is unavailable, add the `@AGENTS.md` import to `CLAUDE.md` while preserving its existing content. After integration, check the loaded instructions in a new session using `/context all`.
+4. Copy a missing `.gitignore`; preserve an existing `.gitignore` and have the agent supplement it only after reviewing its rules.
+5. For manual integration, select the applicable documents. The installation script adds the set of missing documents and the profile template from `docs/`, preserving files with the same names.
+6. For an existing `AGENTS.md`, preserve project rules and add only applicable links or instructions.
+7. Do not create `.cursorrules`, `.windsurfrules`, or other duplicate rules without an explicit request.
+8. Do not create an active `scripts/verification-profile.tsv` blindly. Add the universal `scripts/verify-project.sh`, `scripts/security-scan.sh`, and profile template, then have the agent build a profile only from confirmed commands for the specific project.
 
-## 7. Фаза 3. Синтез и заполнение
+## 7. Phase 3. Synthesis and Completion
 
 ### `AGENTS.md`
 
-Агент заполняет:
+The agent fills in:
 
-- название и назначение проекта;
-- фактический stack;
-- структуру репозитория;
-- реальные команды Automated Verification Gate;
-- краткие ссылки на routing policy и проектные документы.
-- фактическую стадию эксплуатации и условия её пересмотра.
+- The project name and purpose;
+- The actual stack;
+- The repository structure;
+- The actual Automated Verification Gate commands;
+- Concise links to the routing policy and project documents;
+- The actual operational stage and the conditions for reconsidering it.
 
-Если файл уже содержит проектные правила, агент сохраняет их буквально и добавляет только применимые инструкции, которых недостаёт проекту.
+If the file already contains project rules, the agent preserves them verbatim and adds only applicable instructions missing from the project.
 
 ### `docs/agent-routing.md`
 
-Если файл отсутствует, он добавляется из стартер-кита. В brownfield-проекте агент может адаптировать примеры под фактические границы модулей, не создавая новую архитектуру.
+If the file is missing, it is added from the starter kit. In a brownfield project, the agent may adapt examples to actual module boundaries without creating a new architecture.
 
 ### `docs/project-structure.md`
 
-Если файл отсутствует, он добавляется из стартер-кита. В brownfield-проекте агент заполняет фактическую карту ownership, shared-контрактов, направлений зависимостей и исключений для крупных файлов. Массовый refactor выполняется отдельной подтверждаемой задачей.
+If the file is missing, it is added from the starter kit. In a brownfield project, the agent completes the actual map of ownership, shared contracts, dependency directions, and exceptions for large files. Large-scale refactoring is a separate task requiring confirmation.
 
 ### `docs/verification.md`
 
-Если файл отсутствует, он добавляется из стартер-кита. В brownfield-проекте агент заполняет реальные команды проверки, baseline, risk-классификацию, security checks и правила targeted deep check. Универсальные dispatcher и baseline scanner копируются как инфраструктура, но активный профиль создаётся только после проверки манифестов и ограничений окружения.
+If the file is missing, it is added from the starter kit. In a brownfield project, the agent fills in actual verification commands, baseline, risk classification, security checks, and targeted deep check rules. The universal dispatcher and baseline scanner are copied as infrastructure, but the active profile is created only after reviewing manifests and environment constraints.
 
 ### `docs/architecture.md`
 
-Обновляется только если в проекте обнаружена фактическая архитектура, которую текущий документ не отражает. Существующая архитектурная документация не удаляется.
+Update only if the project has an actual architecture that the current document does not reflect. Do not delete existing architectural documentation.
 
 ### `docs/lifecycle.md`
 
-Определи стадию по фактическому риску и потребителям, зафиксируй её и триггеры пересмотра в AGENTS.md. Сохрани существующие правила миграций, восстановления и вывода из эксплуатации. При неизвестности уточни эксплуатационные ограничения до изменения реальных данных.
+Determine the stage from actual risk and consumers, and record it along with reconsideration triggers in AGENTS.md. Preserve existing migration, recovery, and decommissioning rules. If operational constraints are unknown, clarify them before changing real data.
 
 ### `docs/glossary.md`
 
-Дополняется только специфичными терминами, которые подтверждены кодом или документацией. Общие термины не дублируются.
+Supplement only with specific terms confirmed by code or documentation. Do not duplicate general terminology.
 
 ### `docs/state.md`
 
-Заполняется после завершения онбординга: найденный стек, команды, сохранённые документы, известные ограничения и следующий шаг.
+Complete after onboarding: the discovered stack, commands, preserved documents, known constraints, and next step.
 
-## 8. Фаза 4. Отчёт и подтверждение
+## 8. Phase 4. Report and Confirmation
 
-Перед применением изменений, которые затрагивают существующие документы, агент показывает:
+Before applying changes that affect existing documents, the agent shows:
 
-1. Brownfield или Greenfield.
-2. Найденный stack и команды.
-3. Созданные файлы.
-4. Существующие файлы, которые сохранены.
-5. Изменения, которые требуют подтверждения.
-6. Оставшиеся неизвестные и риски.
-7. Точный следующий шаг.
+1. Brownfield or Greenfield.
+2. The discovered stack and commands.
+3. Files created.
+4. Existing files preserved.
+5. Changes that require confirmation.
+6. Remaining unknowns and risks.
+7. The exact next step.
 
-Подтверждение обязательно для:
+Confirmation is mandatory for:
 
-- удаления или перезаписи проектных документов;
-- изменения схемы данных или миграций;
-- изменения auth, RBAC или security;
-- необратимых действий;
-- смены смысла уже согласованного контракта.
+- Deleting or overwriting project documents;
+- Changing data schemas or migrations;
+- Changing auth, RBAC, or security;
+- Irreversible actions;
+- Changing the meaning of an already agreed contract.
 
-## 9. Версионирование и повторное обновление
+## 9. Versioning and Subsequent Updates
 
-При обновлении стартер-кита:
+When updating the starter kit:
 
-- сначала читать текущие `AGENTS.md` и `docs/`;
-- сравнивать новые требования с существующими;
-- добавлять только отсутствующие правила;
-- фиксировать архитектурное изменение в `docs/decisions.md`;
-- обновлять `docs/state.md` после успешной проверки;
-- не изменять чужие решения и не помечать их как устаревшие без явного основания.
+- Read the current `AGENTS.md` and `docs/` first;
+- Compare new requirements with existing ones;
+- Add only missing rules;
+- Record architectural changes in `docs/decisions.md`;
+- Update `docs/state.md` after successful verification;
+- Do not change other people's decisions or mark them obsolete without explicit justification.
 
-Если старый и новый формат конфликтуют, приоритет имеют инварианты безопасности, явные пользовательские решения и сохранность проектных данных. Спорное решение выносится в ADR и на подтверждение.
+If the old and new formats conflict, safety invariants, explicit user decisions, and preservation of project data take precedence. Record disputed decisions in an ADR and request confirmation.
 
-## 10. Критерии завершения онбординга
+## 10. Onboarding Completion Criteria
 
-Онбординг считается завершённым, если:
+Onboarding is complete when:
 
-- проект классифицирован как Brownfield или Greenfield;
-- фактический stack подтверждён или вопросы greenfield закрыты;
-- `AGENTS.md` содержит актуальные ссылки и команды;
-- `.gitignore` baseline присутствует или существующие project rules проверены;
-- применимые документы добавлены или уже существуют;
-- существующие документы не потеряны;
-- существующий `CLAUDE.md` сохранён, а при запросе совместимости добавлен импорт, если файла ещё не было;
-- пользователь получил отчёт о том, что было найдено и изменено;
-- Verification Gate запущен для доступных команд проекта;
-- `scripts/verification-profile.tsv` создан из подтверждённых команд или ограничения явно зафиксированы как `blocked`.
-- стадия эксплуатации определена; полный Acceptance Gate содержит хотя бы одну подтверждённую обязательную проверку. Если это невозможно, результат проверки остаётся blocked.
+- The project is classified as Brownfield or Greenfield;
+- The actual stack is confirmed or greenfield questions are resolved;
+- `AGENTS.md` contains current links and commands;
+- The `.gitignore` baseline is present or existing project rules have been reviewed;
+- Applicable documents are added or already exist;
+- No existing documents have been lost;
+- The existing `CLAUDE.md` is preserved, and when compatibility is requested, the import is added if the file did not yet exist;
+- The user has received a report of what was found and changed;
+- The Verification Gate has been run for the available project commands;
+- `scripts/verification-profile.tsv` has been created from confirmed commands or constraints are explicitly recorded as `blocked`;
+- The operational stage is defined; the full Acceptance Gate contains at least one confirmed required check. If this is impossible, the verification result remains blocked.

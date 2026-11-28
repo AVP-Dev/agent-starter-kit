@@ -2,12 +2,12 @@
 set -euo pipefail
 
 usage() {
-  printf '%s\n' "Использование: $0 [--profile PATH] [--only LAYER[,LAYER...]] [--list] [--dry-run] [--diagnostic]" \
-    "  --profile PATH  профиль команд относительно корня проекта" \
-    "  --only LAYERS   запустить только указанные слои" \
-    "  --list          показать профиль без запуска" \
-    "  --dry-run       показать выбранные проверки без запуска" \
-    "  --diagnostic    разрешить запуск без обязательных проверок (не Acceptance Gate)"
+  printf '%s\n' "Usage: $0 [--profile PATH] [--only LAYER[,LAYER...]] [--list] [--dry-run] [--diagnostic]" \
+    "  --profile PATH  command profile relative to the project root" \
+    "  --only LAYERS   run only the specified layers" \
+    "  --list          show the profile without running checks" \
+    "  --dry-run       show the selected checks without running them" \
+    "  --diagnostic    allow runs without required checks (not an Acceptance Gate)"
 }
 
 fail() {
@@ -25,12 +25,12 @@ seen_names=""
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --profile)
-      [ "$#" -ge 2 ] || fail "--profile требует путь"
+      [ "$#" -ge 2 ] || fail "--profile requires a path"
       PROFILE_PATH="$2"
       shift 2
       ;;
     --only)
-      [ "$#" -ge 2 ] || fail "--only требует список слоёв"
+      [ "$#" -ge 2 ] || fail "--only requires a list of layers"
       ONLY="$2"
       shift 2
       ;;
@@ -51,7 +51,7 @@ while [ "$#" -gt 0 ]; do
       exit 0
       ;;
     *)
-      printf 'Неизвестная опция: %s\n' "$1" >&2
+      printf 'Unknown option: %s\n' "$1" >&2
       usage >&2
       exit 2
       ;;
@@ -83,17 +83,17 @@ selected_layer() {
 
 if [ -n "$ONLY" ]; then
   case "$ONLY" in
-    ,*|*,|*,,*) fail "пустой слой в --only" ;;
+    ,*|*,|*,,*) fail "empty layer in --only" ;;
   esac
   IFS=',' read -r -a requested_layers <<<"$ONLY"
-  [ "${#requested_layers[@]}" -gt 0 ] || fail "пустой --only"
+  [ "${#requested_layers[@]}" -gt 0 ] || fail "empty --only"
   for layer in "${requested_layers[@]}"; do
-    valid_layer "$layer" || fail "неизвестный слой: $layer"
+    valid_layer "$layer" || fail "unknown layer: $layer"
   done
 fi
 
-[ -f "$PROFILE_FILE" ] || fail "профиль не найден: $PROFILE_FILE"
-[ -r "$PROFILE_FILE" ] || fail "профиль недоступен для чтения: $PROFILE_FILE"
+[ -f "$PROFILE_FILE" ] || fail "profile not found: $PROFILE_FILE"
+[ -r "$PROFILE_FILE" ] || fail "profile is not readable: $PROFILE_FILE"
 
 cd "$PROJECT_ROOT"
 
@@ -117,9 +117,9 @@ while IFS= read -r row || [ -n "$row" ]; do
   # Bash read collapses whitespace delimiters, including empty TSV fields.
   tab=$'\t'
   case "$row" in
-    *"$tab"*"$tab"*"$tab"*"$tab"*) fail "строка $line_number: лишние поля" ;;
+    *"$tab"*"$tab"*"$tab"*"$tab"*) fail "line $line_number: extra fields" ;;
     *"$tab"*"$tab"*"$tab"*) ;;
-    *) fail "строка $line_number: ожидаются четыре поля" ;;
+    *) fail "line $line_number: expected four fields" ;;
   esac
   name="${row%%"$tab"*}"
   row="${row#*"$tab"}"
@@ -127,15 +127,15 @@ while IFS= read -r row || [ -n "$row" ]; do
   row="${row#*"$tab"}"
   required="${row%%"$tab"*}"
   command="${row#*"$tab"}"
-  [[ "$name" =~ ^[A-Za-z0-9._-]+$ ]] || fail "строка $line_number: недопустимое имя проверки"
-  valid_layer "$layer" || fail "строка $line_number: неизвестный слой '$layer'"
+  [[ "$name" =~ ^[A-Za-z0-9._-]+$ ]] || fail "line $line_number: invalid check name"
+  valid_layer "$layer" || fail "line $line_number: unknown layer '$layer'"
   case "$required" in
     0|1) ;;
-    *) fail "строка $line_number: required должен быть 0 или 1" ;;
+    *) fail "line $line_number: required must be 0 or 1" ;;
   esac
-  [ -n "$command" ] || fail "строка $line_number: команда не может быть пустой"
+  [ -n "$command" ] || fail "line $line_number: command cannot be empty"
   case ";$seen_names;" in
-    *";$name;"*) fail "строка $line_number: повторяющееся имя проверки '$name'" ;;
+    *";$name;"*) fail "line $line_number: duplicate check name '$name'" ;;
   esac
   seen_names="$seen_names;$name"
   names+=("$name")
@@ -144,7 +144,7 @@ while IFS= read -r row || [ -n "$row" ]; do
   commands+=("$command")
 done <"$PROFILE_FILE"
 
-[ "${#names[@]}" -gt 0 ] || fail "профиль не содержит проверок"
+[ "${#names[@]}" -gt 0 ] || fail "profile contains no checks"
 
 if [ "$LIST_ONLY" -eq 0 ] && [ "$DRY_RUN" -eq 0 ] && [ "$DIAGNOSTIC" -eq 0 ]; then
   selected_required=0
@@ -153,7 +153,7 @@ if [ "$LIST_ONLY" -eq 0 ] && [ "$DRY_RUN" -eq 0 ] && [ "$DIAGNOSTIC" -eq 0 ]; th
       selected_required=$((selected_required + 1))
     fi
   done
-  [ "$selected_required" -gt 0 ] || fail "Acceptance Gate требует хотя бы одну обязательную проверку"
+  [ "$selected_required" -gt 0 ] || fail "Acceptance Gate requires at least one required check"
 fi
 
 for index in "${!names[@]}"; do
@@ -201,7 +201,7 @@ if [ "$LIST_ONLY" -eq 1 ]; then
   exit 0
 fi
 
-[ "$selected" -eq 1 ] || fail "не выбрано ни одной проверки для запуска"
+[ "$selected" -eq 1 ] || fail "no checks selected to run"
 
 if [ "$failures" -gt 0 ]; then
   printf '[verify] failed: %s required check(s), %s warning(s)\n' "$failures" "$warnings" >&2

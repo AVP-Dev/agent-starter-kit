@@ -1,33 +1,33 @@
-# Текущее состояние проекта (Session Ledger)
+# Current Project State (Session Ledger)
 
-> Этот файл экономит контекст и токены, отражая актуальный срез на конец каждой рабочей сессии: «Что сделано, что в работе, что сломано, что делать дальше».
-> В новом проекте агент заполняет шаблон после онбординга; в существующем проекте обновляет его без удаления проектных записей.
+> This file saves context and tokens by capturing the current state at the end of each working session: "What is done, what is in progress, what is broken, and what comes next."
+> In a new project, the agent fills in this template after onboarding; in an existing project, it updates the file without deleting project records.
 
 ---
 
-###### Последнее обновление
-Дата: [YYYY-MM-DD] (Статус: Инициализация / Активная разработка)
+###### Last updated
+Date: [YYYY-MM-DD] (Status: Initialization / Active development)
 
-**Ключевые результаты последней сессии:**
-1. [Результат 1]
-2. [Результат 2]
-3. [Достижения сессии]
+**Key results of the last session:**
+1. [Result 1]
+2. [Result 2]
+3. [Session achievements]
 
-**Что сейчас в работе:**
-- [ ] [Текущая задача, компонент или модуль в разработке]
+**Work in progress:**
+- [ ] [Current task, component, or module under development]
 
 ## Active Runs
 
-> Для длительных задач и multi-agent работы. Обновлять после каждого checkpoint или quality gate. Не записывать секреты и сырые транскрипты.
+> For long-running tasks and multi-agent work. Update after each checkpoint or quality gate. Do not record secrets or raw transcripts.
 
 | Run ID | Task / Topology | Owner | Scope | Status | Evidence | Last good commit | Next step |
 |---|---|---|---|---|---|---|---|
-| [run-id] | [задача / topology] | [worker или orchestrator] | [файлы/модули] | [planned / running / verified / accepted / blocked] | [ссылка на evidence] | [commit или `—`] | [одно действие] |
+| [run-id] | [task / topology] | [worker or orchestrator] | [files/modules] | [planned / running / verified / accepted / blocked] | [link to evidence] | [commit or `—`] | [one action] |
 
-**Что сломано / Известный техдолг:**
-- Нет (или конкретный список известных проблем и компромиссов, требующих решения).
-- Для каждой записи укажи причину, scope, риск, владельца и дату или измеримое условие пересмотра. См. [политику жизненного цикла](lifecycle.md).
+**What is broken / Known technical debt:**
+- None (or a specific list of known issues and tradeoffs requiring resolution).
+- For each entry, record the reason, scope, risk, owner, and date or measurable condition for reconsideration. See the [lifecycle policy](lifecycle.md).
 
-**Следующие шаги:**
-1. [Следующая приоритетная задача по плану]
-2. [Проверка доступных команд проекта: typecheck, lint, test]
+**Next steps:**
+1. [Next priority task on the plan]
+2. [Check available project commands: typecheck, lint, test]

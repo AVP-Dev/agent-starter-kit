@@ -2,9 +2,9 @@
 set -euo pipefail
 
 usage() {
-  printf '%s\n' "Использование: $0" \
-    "Сканирует tracked и неигнорируемые untracked файлы проекта на вероятные секреты." \
-    "Код возврата: 0 — чисто, 1 — findings, 2 — ошибка сканера."
+  printf '%s\n' "Usage: $0" \
+    "Scans tracked and non-ignored untracked project files for potential secrets." \
+    "Exit code: 0 — clean, 1 — findings, 2 — scanner error."
 }
 
 case "${1:-}" in
@@ -15,7 +15,7 @@ case "${1:-}" in
     fi
     ;;
   *)
-    printf 'Неизвестная опция: %s\n' "$1" >&2
+    printf 'Unknown option: %s\n' "$1" >&2
     usage >&2
     exit 2
     ;;
@@ -67,7 +67,7 @@ scan_pattern() {
   local matches match line_number candidate
   matches="$(LC_ALL=C grep "${options[@]}" -- "$pattern" "$file" 2>/dev/null)" || status=$?
   if [ "$status" -gt 1 ]; then
-    printf 'security-scan: не удалось прочитать %s\n' "$file" >&2
+    printf 'security-scan: could not read %s\n' "$file" >&2
     return 2
   fi
   if [ "$status" -eq 0 ]; then
@@ -91,7 +91,7 @@ scan_file() {
   [ -L "$file" ] && return 0
   [ -f "$file" ] || return 0
   if [ ! -r "$file" ]; then
-    printf 'security-scan: файл недоступен для чтения: %s\n' "$file" >&2
+    printf 'security-scan: file is not readable: %s\n' "$file" >&2
     return 2
   fi
 
@@ -123,12 +123,12 @@ trap 'rm -f -- "$file_list"' EXIT
 
 if command -v git >/dev/null 2>&1 && git -C "$PROJECT_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   if ! git -C "$PROJECT_ROOT" ls-files -z --cached --others --exclude-standard >"$file_list"; then
-    printf 'security-scan: не удалось получить список файлов Git\n' >&2
+    printf 'security-scan: could not retrieve the Git file list\n' >&2
     exit 2
   fi
 else
   if ! find . \( -type d \( -name .git -o -name node_modules -o -name vendor -o -name .venv -o -name venv -o -name dist -o -name build -o -name coverage -o -name .next -o -name target \) -prune \) -o -type f -print0 >"$file_list"; then
-    printf 'security-scan: не удалось получить список файлов\n' >&2
+    printf 'security-scan: could not retrieve the file list\n' >&2
     exit 2
   fi
 fi
@@ -138,7 +138,7 @@ while IFS= read -r -d '' file; do
 done <"$file_list"
 
 if [ "$findings" -gt 0 ]; then
-  printf 'security-scan: найдено %s потенциальных finding(s)\n' "$findings" >&2
+  printf 'security-scan: found %s potential finding(s)\n' "$findings" >&2
   exit 1
 fi
 

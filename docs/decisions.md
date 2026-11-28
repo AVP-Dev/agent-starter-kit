@@ -1,162 +1,162 @@
-# Реестр архитектурных решений (Architecture Decision Records)
+# Architecture Decision Records
 
-> В этот файл заносятся ВСЕ ключевые инженерные решения, принятые человеком или согласованные с агентом.
-> Формат: Контекст → Решение → Инварианты → Последствия (+/-).
-
----
-
-### [2026-11-26] ADR-008. Управляемая эволюция и честная приёмка
-
-**Статус:** принято.
-
-**Контекст:** правила создания не определяли переход к реальной эксплуатации; матрица зон отсутствовала в актуальном AGENTS.md, а optional-only профиль мог завершаться успешно.
-
-**Решение:** восстановить Zone 1/2/3, добавить lifecycle policy, связать DESIGN с риском контура и evidence, ограничить циклы агента. Полный gate требует хотя бы одной обязательной проверки и прохождения всех обязательных команд; диагностика не подтверждает приёмку.
-
-**Инварианты:** ADR-007 сохраняется; проектные инструменты и стадии адаптируются к фактам, безопасность и сохранность данных не ослабляются. Не вводится отдельный runtime или второй словарь полномочий.
-
-**Последствия:** более предсказуемые изменения контрактов и проверяемая приёмка; существующие optional-only профили требуют заполнения или явной диагностики.
+> Record ALL key engineering decisions made by a human or agreed with an agent in this file.
+> Format: Context → Decision → Invariants → Consequences (+/-).
 
 ---
 
-### [2026-11-25] ADR-007. Адаптация рекомендаций к проекту
+### [2026-11-26] ADR-008. Controlled Evolution and Honest Acceptance
 
-**Статус** — принято. Уточняет действующий порядок по ADR-001, ADR-002, ADR-003 и ADR-004. Исторические формулировки сохранены ниже.
+**Status:** Accepted.
 
-**Контекст.** Универсальные лимиты и обязательные этапы создавали лишние циклы в локальных задачах и мешали подключать комплект к действующему проекту.
+**Context:** The development rules did not define the transition to real-world operation; the zone matrix was absent from the current AGENTS.md, and an optional-only profile could finish successfully.
 
-**Решение.** Подбирать структуру, глубину проектирования, способ работы и проверки по влиянию задачи. Использовать размер файла и длину отчёта как ориентиры. Сохранять строгие границы доступа, сохранность данных и принятые проектом обязательные проверки. Рабочие проверки сравнивать с исходным состоянием. По умолчанию устанавливать инструкции через `AGENTS.md`. Добавлять импорт через `CLAUDE.md` по запросу совместимости.
+**Decision:** Restore Zone 1/2/3, add a lifecycle policy, connect DESIGN to the affected system's risk and evidence, and limit agent work cycles. A full gate requires at least one required check and successful execution of all required commands; diagnostics do not establish acceptance.
 
----
+**Invariants:** ADR-007 remains in effect; project tools and stages adapt to facts, and security and data preservation are not weakened. No separate runtime or second permission vocabulary is introduced.
 
-### [2026-09-24] ADR-003: Адаптивная маршрутизация агентов и контроль контекста
-**Статус:** Принято; default topology уточнён ADR-004
-**Примечание:** формулировка `single` как default ниже сохранена как историческая; для нетривиальных задач действует `orchestrated` из ADR-004.
-**Контекст:** Разные практики работы агентов дают противоположные результаты в зависимости от размера, независимости и повторяемости задачи. Универсальная шкала моделей, swarm по умолчанию или runtime-оркестратор усложнили бы docs-only стартер-кит и не подходят проектам с разными ресурсами.
-**Решение:**
-1. Оставить `Zone 1/2/3` единственной осью ответственности и риска.
-2. Добавить отдельную декларативную ось `Topology`: `single`, `fixed-pipeline`, `side-research`, `parallel`, `hierarchical`.
-3. По умолчанию выбирать `single`; усложнять оркестрацию только при наличии независимых подзадач или повторяемого процесса.
-4. Передавать между агентами короткий контекстный пакет, а не полный чат; side research должен быть read-only и возвращать evidence.
-5. Применять deterministic-first, probe-before-refusal, защиту тестов и явное правило fallback.
-6. Проверять решения на пяти базовых сценариях до расширения набора.
-**Инварианты:**
-- Стартер-кит остаётся документарным, vendor-neutral и переносимым.
-- Существующие проектные файлы не перезаписываются автоматически.
-- Простой handoff не считается заменой проверенного контракта.
-- Смена риска, прав доступа или смысла fallback не происходит молча.
-**Альтернативы:** Runtime-оркестратор, отдельные шкалы `T0–T6` и `L0–L4`, модельные профили и platform-specific adapters отклонены как избыточные для текущего формата.
-**Последствия:**
-(+) Меньше инструкций в системном контексте и меньше неожиданной сложности.
-(+) Решения можно проверять на одинаковых типах задач и менять после реальных измерений.
-(+) Один и тот же протокол работает с разными агентами, инструментами и вычислительными ресурсами.
-(-) Некоторые оптимальные стратегии придётся выбирать экспериментально.
-**Условия пересмотра:** изменение модели или harness, повторяющиеся сбои маршрутизации, появление измеримой необходимости в runtime или накопление результатов пилота.
+**Consequences:** More predictable contract changes and verifiable acceptance; existing optional-only profiles must be completed or used explicitly for diagnostics.
 
 ---
 
-### [2026-09-24] ADR-004: Orchestrator-first delegation и checkpointed long sessions
-**Статус:** Принято
-**Контекст:** Режим `single` по умолчанию позволял основному агенту незаметно выполнять содержательную работу, накапливать контекст и терять границы между независимыми исполнителями. Для длительных сессий это повышает риск дублирования, конфликтов и неконтролируемой потери контекста.
-**Решение:**
-1. Для нетривиальных задач основной агент работает как `orchestrator` и делегирует исследование, проектирование, реализацию и подготовку результата worker-агентам.
-2. `single` остаётся только для тривиальных, полностью детерминированных задач или явного fallback при отсутствии delegation capability.
-3. Workers получают ограниченный scope и изолированный контекст; запись в канонические документы принадлежит одному integrator или основному агенту.
-4. После каждого этапа и quality gate сохраняется короткий checkpoint с Run ID, evidence и следующим шагом.
-5. В длинных сессиях оркестратор сохраняет task ledger и ссылки на артефакты, а не сырые логи и полные транскрипты.
-6. Детерминированные control-plane действия — чтение состояния, запуск проверок, git status и интеграция — может выполнять сам оркестратор.
-**Инварианты:** содержательная работа нетривиальной задачи делегируется; независимые агенты не получают взаимный неограниченный доступ; результат не принимается без проверки и evidence.
-**Альтернативы:** `single` для всех задач, обязательный swarm и полноценный runtime-оркестратор отклонены как чрезмерные либо недостаточно управляемые.
-**Последствия:**
-(+) Меньше контекстного шума и меньше неявной работы в основной сессии.
-(+) Длинные задачи можно безопасно продолжать после checkpoint или новой сессии.
-(-) Появляется overhead на handoff, поэтому он применяется только к нетривиальным задачам.
-**Условия пересмотра:** отсутствие стабильной delegation capability, повторяющиеся конфликты интеграции, рост числа незавершённых веток или измеримая неэффективность handoff.
+### [2026-11-25] ADR-007. Adapting Guidance to the Project
+
+**Status:** Accepted. Clarifies the current process under ADR-001, ADR-002, ADR-003, and ADR-004. Historical wording is preserved below.
+
+**Context.** Universal limits and mandatory stages created unnecessary cycles for local tasks and made the kit harder to adopt in an existing project.
+
+**Decision.** Select the structure, design depth, execution approach, and verification according to the task's impact. Use file size and report length as guidelines. Retain strict access boundaries, data preservation, and the required checks adopted by the project. Compare verification results against the baseline. Install instructions through `AGENTS.md` by default. Add an import through `CLAUDE.md` when requested for compatibility.
 
 ---
 
-### [2026-09-25] ADR-006: Reproducible CI и tag-based release gate
-**Статус:** Принято
-**Контекст:** Публичный docs-only шаблон должен доказывать одинаковый Verification Gate после push и в чистом clone, а не полагаться на ручной запуск локальных команд. Версии должны быть воспроизводимыми и откатываемыми.
-**Решение:**
-1. Добавить `.github/workflows/verification.yml` для push в `main`, pull request в `main` и ручного запуска.
-2. Использовать `contents: read`, `pull_request` без trusted-base secrets и checkout без сохранения credentials.
-3. Запускать в CI тот же `scripts/verify-project.sh`, затем проверять локальные Markdown-ссылки и чистоту checkout.
-4. Создавать annotated tag `vYYYY.N.P` только после зелёного CI и публиковать Release из проверенного tag.
-**Инварианты:** локальный и CI gate используют один project-local profile; CI не получает лишних permissions; красный или неясный результат блокирует tag; tag не переписывается без явного нового релиза.
-**Альтернативы:** ручной запуск без CI, workflow с `pull_request_target` и секретами, автоматический tag на каждом commit и vendor-specific CI runners отклонены как менее безопасные или менее воспроизводимые.
-**Последствия:**
-(+) Регрессии обнаруживаются до merge и в чистом GitHub checkout.
-(+) Версии можно явно откатить и установить через tag.
-(-) Появляется короткий процесс подготовки релиза и зависимость от доступности GitHub Actions.
-**Условия пересмотра:** изменение состава Gate, необходимость в отдельных deployment jobs или переход на другую CI-платформу.
+### [2026-09-24] ADR-003: Adaptive Agent Routing and Context Control
+**Status:** Accepted; default topology clarified by ADR-004
+**Note:** The description of `single` as the default below is preserved for historical purposes; `orchestrated` from ADR-004 applies to non-trivial tasks.
+**Context:** Agent workflows produce opposite outcomes depending on the size, independence, and repeatability of a task. A universal model scale, swarm by default, or runtime orchestrator would complicate the docs-only starter kit and would not suit projects with differing resources.
+**Decision:**
+1. Retain `Zone 1/2/3` as the only axis of responsibility and risk.
+2. Add a separate declarative axis, `Topology`: `single`, `fixed-pipeline`, `side-research`, `parallel`, `hierarchical`.
+3. Choose `single` by default; add orchestration complexity only for independent subtasks or a repeatable process.
+4. Transfer concise context packages between agents rather than the entire chat; side research must be read-only and return evidence.
+5. Apply deterministic-first, probe-before-refusal, test protection, and an explicit fallback rule.
+6. Verify decisions on five basic scenarios before expanding the set.
+**Invariants:**
+- The starter kit remains documentation-based, vendor-neutral, and portable.
+- Existing project files are not overwritten automatically.
+- A simple handoff does not replace a verified contract.
+- Changes to risk, access permissions, or the meaning of a fallback do not happen silently.
+**Alternatives:** A runtime orchestrator, separate `T0–T6` and `L0–L4` scales, model profiles, and platform-specific adapters were rejected as excessive for the current format.
+**Consequences:**
+(+) Fewer instructions in the system context and less unexpected complexity.
+(+) Decisions can be verified against the same task types and revised after actual measurements.
+(+) The same protocol works with different agents, tools, and computing resources.
+(-) Some optimal strategies must be chosen experimentally.
+**Review triggers:** Changes to the model or harness, recurring routing failures, measurable need for a runtime, or accumulated pilot results.
 
 ---
 
-### [2026-09-25] ADR-005: Project-local verification profile и универсальный dispatcher
-**Статус:** Принято
-**Контекст:** В стартер-кит нельзя встроить один test runner или набор security tools для всех языков и package managers. При этом отсутствие общего способа запуска проверок приводит к пропуску typecheck, lint, regression и security gates.
-**Решение:**
-1. Добавить универсальный `scripts/verify-project.sh`, который запускает только явно описанные команды из локального TSV-профиля.
-2. Добавить `scripts/security-scan.sh` как dependency-free baseline для вероятных секретов и environment-файлов без печати найденных значений.
-3. Передавать шаблон профиля через onboarding, но создавать активный профиль целевого проекта только после чтения manifests, lockfiles, CI и существующих scripts.
-4. Считать отсутствующий или невалидный профиль blocking failure; optional-проверки с `required=0` не должны маскировать required failure.
-5. Не копировать собственный профиль стартер-кита в целевой проект, чтобы не подменять команды и security policy другого стека.
-**Инварианты:** dispatcher не меняет права доступа и не выполняет команды вне project-local профиля; security findings не раскрывают значения; универсальный baseline не заменяет SAST/SCA; активный профиль не создаётся из догадок.
-**Альтернативы:** hardcoded `scripts/verify.sh` с autodetect стека, обязательная установка gitleaks/Semgrep/trivy и единый runner на всех языках отклонены как хрупкие и vendor-coupled.
-**Последствия:**
-(+) Появляется единый fail-closed entry point и воспроизводимый gate для проектов с разными стеками.
-(+) Команды и security tools остаются явными, проверяемыми и заменяемыми после onboarding.
-(-) Проект должен заполнить профиль; универсальный сканер требует регулярной проверки false positives и дополняется внешними инструментами.
-**Условия пересмотра:** появление стабильного cross-stack standard для test/security протоколов, массовые false positives или необходимость в policy-as-code beyond TSV.
+### [2026-09-24] ADR-004: Orchestrator-First Delegation and Checkpointed Long Sessions
+**Status:** Accepted
+**Context:** The default `single` mode allowed the primary agent to perform substantive work without visibility, accumulate context, and lose the boundaries between independent workers. In long sessions, this increases the risk of duplicated work, conflicts, and uncontrolled context loss.
+**Decision:**
+1. For non-trivial tasks, the primary agent acts as an `orchestrator` and delegates research, design, implementation, and preparation of the result to worker agents.
+2. `single` remains reserved for trivial, entirely deterministic tasks or an explicit fallback when delegation capability is unavailable.
+3. Workers receive bounded scopes and isolated contexts; only one integrator or the primary agent writes canonical documents.
+4. After each stage and quality gate, save a short checkpoint with Run ID, evidence, and the next step.
+5. In long sessions, the orchestrator retains the task ledger and artifact references rather than raw logs and complete transcripts.
+6. Deterministic control-plane actions — reading state, running checks, git status, and integration — may be performed by the orchestrator.
+**Invariants:** Substantive work on a non-trivial task is delegated; independent agents do not receive unrestricted access to each other; results are not accepted without verification and evidence.
+**Alternatives:** `single` for every task, mandatory swarm, and a full runtime orchestrator were rejected as excessive or insufficiently controllable.
+**Consequences:**
+(+) Less context noise and less implicit work in the primary session.
+(+) Long tasks can be safely resumed from a checkpoint or in a new session.
+(-) Handoff introduces overhead, so it is applied only to non-trivial tasks.
+**Review triggers:** Lack of reliable delegation capability, recurring integration conflicts, an increasing number of unfinished workstreams, or measurable handoff inefficiency.
 
 ---
 
-### [2026-09-11] ADR-002: Инструментальная верификация, безопасная Git-синхронизация и актуализация стека 2026
-**Статус:** Принято; устаревшая ссылка на removed GitHub-интеграцию уточнена ниже
-**Контекст:** Полагаться исключительно на текстовые промпты без инструментального контроля приводит к context drift и незамеченным регрессиям. Кроме того, требовалась актуализация стека (Node.js 24 LTS / Node.js 26 Current, Bun 1.3+, Go 1.27+, Python 3.14, pgvector/HNSW, Docker/Coolify) и унификация под ключевые среды: Gemini Antigravity, Claude Code, OpenAI Codex / GitHub Copilot.
-**Решение:**
-1. Исключить устаревшие монолитные правила `.cursorrules` и `.windsurfrules`. Использовать корневой `AGENTS.md` как SSOT, а `CLAUDE.md` — как совместимый symlink там, где это поддерживается. Файл `.github/copilot-instructions.md` был удалён в 2026.2.0 и не является действующим путём стандарта.
-2. Ввести обязательный **Automated Verification Gate**: итерация не завершается без запуска линтера, тайпчека и тестов (`exit code 0`). Каждая итерация обязана содержать тесты негативных и краевых сценариев.
-3. Ввести протокол безопасной синхронизации Git: проверка `git fetch origin && git status -uno` перед началом работ; немедленная остановка и уведомление пользователя при отставании от origin (запрет слепого `git pull`); фиксация каждой успешной итерации атомарным коммитом (Conventional Commits).
-4. Ввести правило проверки библиотек через Context7 MCP / поиск и согласования критических breaking changes.  
-**Инварианты:**  
-- Никакой непроверенный автотестами код не считается завершенным.
-- Никаких неявных изменений кода при расхождении с удаленной веткой GitHub.  
-**Последствия:**  
-(+) Гарантированное качество и предсказуемость вайб-кодинга;  
-(+) Полная совместимость с экосистемами Gemini Antigravity, Claude Code и GitHub Copilot / Codex;  
-(+) Защита от потери локальных изменений и конфликтов в Git.  
-(-) Необходимость затрат времени агента на выполнение команд тестов и линтинга.
+### [2026-09-25] ADR-006: Reproducible CI and Tag-Based Release Gate
+**Status:** Accepted
+**Context:** A public docs-only template must demonstrate the same Verification Gate after push and in a clean clone, rather than relying on manually run local commands. Versions must be reproducible and reversible.
+**Decision:**
+1. Add `.github/workflows/verification.yml` for pushes to `main`, pull requests targeting `main`, and manual runs.
+2. Use `contents: read`, `pull_request` without trusted-base secrets, and checkout without persisting credentials.
+3. Run the same `scripts/verify-project.sh` in CI, then check local Markdown links and checkout cleanliness.
+4. Create an annotated tag `vYYYY.N.P` only after CI passes and publish a Release from the verified tag.
+**Invariants:** Local and CI gates use one project-local profile; CI receives no unnecessary permissions; a failed or inconclusive result blocks the tag; a tag is not rewritten without an explicit new release.
+**Alternatives:** Manual execution without CI, a workflow with `pull_request_target` and secrets, automatic tagging on every commit, and vendor-specific CI runners were rejected as less safe or less reproducible.
+**Consequences:**
+(+) Regressions are detected before merge and in a clean GitHub checkout.
+(+) Versions can be explicitly rolled back and installed by tag.
+(-) Adds a short release preparation process and a dependency on GitHub Actions availability.
+**Review triggers:** Changes to the gate's composition, the need for separate deployment jobs, or a migration to another CI platform.
 
 ---
 
-### [2026-09-11] ADR-001: Принятие стандарта «Skeleton + Pluggable Modules» и предпроектного манифеста
-**Статус:** Принято  
-**Контекст:** Разработка системы ведется с участием автономных кодинг-агентов. Без жесткого разделения ответственности и фиксации инвариантов высок риск архитектурной деградации, спагетти-кода и потери контроля над устойчивостью.  
-**Решение:**
-1. Разделение проекта на устойчивый каркас (Skeleton: БД, Auth, шина событий) и сменные изолированные модули (Pluggable Modules).
-2. Внедрение Матрицы делегирования (Зона 1: 100% AI, Зона 2: Контракт 50/50, Зона 3: Только Архитектор).
-3. Обязательная предпроектная фиксация DESIGN-манифеста (Инварианты, State Machine, Failure Modes, Acceptance Invariants) перед генерацией нетривиального кода.
-4. Протокол Confirmation Gate при любых модификациях схемы БД, авторизации или безопасности.  
-**Последствия:**  
-(+) Исключение спагетти-кода и скрытого сцепления;  
-(+) Сценарии сетевых сбоев и дублирующих запросов проектируются ДО написания логики;  
-(+) Возможность быстрой перегенерации отдельных модулей с нуля без риска сломать ядро.  
-(-) Необходимость краткого согласования манифеста перед стартом задач Зоны 2.
+### [2026-09-25] ADR-005: Project-Local Verification Profile and Universal Dispatcher
+**Status:** Accepted
+**Context:** A single test runner or security toolset for all languages and package managers cannot be built into the starter kit. However, the absence of a common way to run checks results in missed typecheck, lint, regression, and security gates.
+**Decision:**
+1. Add the universal `scripts/verify-project.sh`, which runs only commands explicitly defined in the local TSV profile.
+2. Add `scripts/security-scan.sh` as a dependency-free baseline for detecting potential secrets and environment files without printing detected values.
+3. Provide a profile template during onboarding, but create the active target-project profile only after reading manifests, lockfiles, CI, and existing scripts.
+4. Treat a missing or invalid profile as a blocking failure; optional checks with `required=0` must not mask a required failure.
+5. Do not copy the starter kit's own profile into a target project, to avoid replacing another stack's commands and security policy.
+**Invariants:** The dispatcher does not change access permissions or run commands outside the project-local profile; security findings do not expose values; the universal baseline does not replace SAST/SCA; the active profile is not created from guesswork.
+**Alternatives:** A hardcoded `scripts/verify.sh` with stack autodetection, mandatory installation of gitleaks/Semgrep/trivy, and one runner for all languages were rejected as brittle and vendor-coupled.
+**Consequences:**
+(+) A single fail-closed entry point and a reproducible gate are available for projects with different stacks.
+(+) Commands and security tools remain explicit, verifiable, and replaceable after onboarding.
+(-) The project must complete its profile; the universal scanner requires regular review for false positives and is supplemented by external tools.
+**Review triggers:** The emergence of a stable cross-stack standard for test/security protocols, widespread false positives, or the need for policy-as-code beyond TSV.
 
 ---
 
-### Шаблон для новой записи ADR:
+### [2026-09-11] ADR-002: Tool-Based Verification, Safe Git Synchronization, and the 2026 Stack Update
+**Status:** Accepted; the outdated reference to a removed GitHub integration is clarified below
+**Context:** Relying solely on text prompts without tool-based verification leads to context drift and unnoticed regressions. The stack also needed an update (Node.js 24 LTS / Node.js 26 Current, Bun 1.3+, Go 1.27+, Python 3.14, pgvector/HNSW, Docker/Coolify) and alignment across key environments: Gemini Antigravity, Claude Code, OpenAI Codex / GitHub Copilot.
+**Decision:**
+1. Remove outdated monolithic rules `.cursorrules` and `.windsurfrules`. Use the root `AGENTS.md` as the SSOT, with `CLAUDE.md` as a compatible symlink where supported. The file `.github/copilot-instructions.md` was removed in 2026.2.0 and is not a current standard path.
+2. Introduce a mandatory **Automated Verification Gate**: an iteration is not complete without running the linter, typecheck, and tests (`exit code 0`). Every iteration must include negative and edge-case tests.
+3. Introduce a safe Git synchronization protocol: check `git fetch origin && git status -uno` before starting work; stop immediately and notify the user if behind origin (blind `git pull` is prohibited); record each successful iteration in an atomic commit (Conventional Commits).
+4. Introduce a rule to verify libraries through Context7 MCP / search and agree on critical breaking changes.<br>
+**Invariants:**<br>
+- No code that has not been verified by automated tests is considered complete.
+- No implicit code changes when the local branch diverges from the remote GitHub branch.<br>
+**Consequences:**<br>
+(+) Assured quality and predictability of vibe coding;<br>
+(+) Full compatibility with the Gemini Antigravity, Claude Code, and GitHub Copilot / Codex ecosystems;<br>
+(+) Protection against loss of local changes and Git conflicts.<br>
+(-) The agent must spend time running test and lint commands.
+
+---
+
+### [2026-09-11] ADR-001: Adoption of the "Skeleton + Pluggable Modules" Standard and Pre-Implementation Manifest
+**Status:** Accepted<br>
+**Context:** The system is developed with autonomous coding agents. Without a strict separation of responsibilities and documented invariants, there is a high risk of architectural degradation, spaghetti code, and loss of control over resilience.<br>
+**Decision:**
+1. Divide the project into a stable foundation (Skeleton: DB, Auth, event bus) and isolated, replaceable modules (Pluggable Modules).
+2. Introduce the Delegation Matrix (Zone 1: 100% AI, Zone 2: Contract 50/50, Zone 3: Architect Only).
+3. Require a DESIGN manifest (Invariants, State Machine, Failure Modes, Acceptance Invariants) before generating non-trivial code.
+4. Establish a Confirmation Gate protocol for any modification to the DB schema, authorization, or security.<br>
+**Consequences:**<br>
+(+) Elimination of spaghetti code and hidden coupling;<br>
+(+) Network failure and duplicate request scenarios are designed BEFORE implementing the logic;<br>
+(+) Individual modules can be quickly regenerated from scratch without risking damage to the core.<br>
+(-) Brief manifest approval is required before starting Zone 2 tasks.
+
+---
+
+### Template for a New ADR:
 
 ```markdown
-### [YYYY-MM-DD] ADR-00X: [Краткое название решения]
-**Статус:** Предложено / Принято / Устарело  
-**Контекст:** Какая возникла проблема, какие ограничения, почему текущее решение не подходит.  
-**Решение:** Что именно решено сделать, какие технологии/паттерны применить.  
-**Инварианты:** Что система гарантирует после внедрения решения.  
-**Альтернативы:** Какие варианты рассматривались и почему были отвергнуты.  
-**Последствия:**  
-(+) Плюсы и выгоды  
-(-) Минусы, компромиссы и новый технический долг
+### [YYYY-MM-DD] ADR-00X: [Short Decision Title]
+**Status:** Proposed / Accepted / Deprecated<br>
+**Context:** What problem arose, what constraints apply, and why the current solution is unsuitable.<br>
+**Decision:** What specifically has been decided and which technologies/patterns to apply.<br>
+**Invariants:** What the system guarantees after implementing the decision.<br>
+**Alternatives:** Which options were considered and why they were rejected.<br>
+**Consequences:**<br>
+(+) Benefits and advantages<br>
+(-) Drawbacks, trade-offs, and new technical debt
 ```

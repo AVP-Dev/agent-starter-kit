@@ -1,70 +1,70 @@
-# Архитектура проекта
+# Project Architecture
 
-> Пример архитектуры с общим каркасом (Skeleton) и сменными модулями (Pluggable Modules). При онбординге опиши фактические границы проекта.
-> Методологическая база: [AI любит прямые дороги](https://avpdev.com/ru/blog/ai-loves-straight-roads/) и [Архитектор будущего](https://avpdev.com/ru/blog/architect-of-the-future/).
-> Обновляется при структурных изменениях системы.
-> Изменение стабильных контрактов и переход между стадиями регулируются [политикой жизненного цикла](lifecycle.md).
+> Example architecture with a shared foundation (Skeleton) and replaceable modules (Pluggable Modules). Describe the actual project boundaries during onboarding.
+> Methodological foundation: [AI Loves Straight Roads: Why Local Optimization Breaks Complex Systems](https://avpdev.com/en/blog/ai-loves-straight-roads/) and [The Architect of the Future: From Line Reviews to Design Reviews](https://avpdev.com/en/blog/architect-of-the-future/).
+> Update when the system undergoes structural changes.
+> Changes to stable contracts and transitions between stages are governed by the [lifecycle policy](lifecycle.md).
 
 ---
 
-## 1. Архитектурный обзор (Skeleton + Pluggable Modules)
+## 1. Architectural Overview (Skeleton + Pluggable Modules)
 
-Такой подход подходит проекту, где несколько модулей делят системные контракты. В примере показаны возможные компоненты. Выбирай хранилище, очередь, аудит, темы и остальные инструменты по требованиям проекта.
+This approach is suitable for a project in which multiple modules share system contracts. The example illustrates possible components. Choose storage, queues, audit, themes, and other tools according to project requirements.
 
 ```
                   ┌────────────────────────────────────────┐
-                  │          АРХИТЕКТОР (ЧЕЛОВЕК)          │
-                  │   Инварианты, Схемы данных, Контракты   │
+                  │            ARCHITECT (HUMAN)           │
+                  │   Invariants, Data Schemas, Contracts  │
                   └───────────────────┬────────────────────┘
                                       │
                                       ▼
                   ┌────────────────────────────────────────┐
-                  │           SKELETON (КАРКАС)            │
+                  │                SKELETON                │
                   │  Auth Context │ Event Bus │ DB Schemas │
                   │     Redis/BullMQ │ pgvector Core       │
                   └─────┬────────────────────────────┬─────┘
                         │                            │
-        изолированный   │                            │ изолированный
-        контракт        ▼                            ▼ контракт
+        isolated        │                            │ isolated
+        contract        ▼                            ▼ contract
   ┌───────────────────────────┐        ┌───────────────────────────┐
   │     PLUGGABLE MODULE A    │        │     PLUGGABLE MODULE B    │
-  │    (Сгенерирован AI)      │        │    (Сгенерирован AI)      │
-  │  RAG-пайплайн / Парсеры   │        │  Внешние интеграции / API │
-  │  Быстро пишется /         │        │  При деградации —         │
-  │  Легко удаляется целиком  │        │  перегенерируется с нуля  │
+  │      (AI-generated)       │        │      (AI-generated)       │
+  │  RAG pipeline / Parsers   │        │  External integrations/API│
+  │  Quick to develop /       │        │  Can be regenerated       │
+  │  Easy to remove entirely  │        │  if quality degrades     │
   └───────────────────────────┘        └───────────────────────────┘
 ```
 
-### 1.1. Skeleton (Каркас)
-- **Контекст аутентификации и сессии**: единый источник правды о текущем пользователе/тенанте.
-- **Единая схема базы данных**: централизованные реляционные сущности, pgvector-хранилища и транзакционные границы (SSOT).
-- **Шина событий и фоновых очередей**: асинхронная коммуникация (Redis, BullMQ) для изоляции тяжелых задач.
-- **Централизованный аудит и логирование**: сквозная трассировка запросов и ошибок.
-- **Визуальный каркас и фабрика тем (Theme-Driven UI Foundation)**: единый контракт семантических дизайн-токенов (CSS-переменные: `--background`, `--foreground`, `--primary`, `--muted`, `--border`, `--radius`) и реестр стилей (`:root`, `.dark`, `[data-theme="..."]`). Сменные модули верстаются исключительно на семантических токенах ядра, гарантируя добавление и смену тем без правки компонентов.
+### 1.1. Skeleton
+- **Authentication and session context**: a single source of truth about the current user/tenant.
+- **Unified database schema**: centralized relational entities, pgvector stores, and transactional boundaries (SSOT).
+- **Event bus and background queues**: asynchronous communication (Redis, BullMQ) to isolate heavy workloads.
+- **Centralized audit and logging**: end-to-end tracing of requests and errors.
+- **Theme-Driven UI Foundation**: a unified contract for semantic design tokens (CSS variables: `--background`, `--foreground`, `--primary`, `--muted`, `--border`, `--radius`) and a style registry (`:root`, `.dark`, `[data-theme="..."]`). Pluggable modules are styled exclusively using the core semantic tokens, enabling themes to be added and switched without editing components.
 
-### 1.2. Pluggable Modules (Сменные модули)
-- Каждый модуль решает узкую прикладную задачу (например, RAG-поиск по векторам, обработка вебхуков, генерация отчетов).
-- Модуль имеет строгий типизированный контракт входов и выходов (DTO / Zod / Pydantic).
-- **Изоляция данных**: модули не имеют прямого доступа к приватным таблицам других модулей. Доступ к общему состоянию — строго через сервисы ядра или шину событий.
-- **Заменяемость (Disposable Modules)**: модуль можно обновить или заменить через его контракт. При смене требований выбирай между локальной правкой и заменой с учётом совместимости, проверок и стоимости.
-- **Оркестрация без отдельного runtime**: выбор topology, handoff и правила side research описаны в [docs/agent-routing.md](agent-routing.md); стандарт не требует собственного сервера оркестрации.
-- **Verification и impact policy**: pre-change impact, positive/negative/security/regression проверки и recovery описаны в [docs/verification.md](verification.md).
-
----
-
-## 2. Пример потока данных
-
-1. **Входной запрос**: fail-closed валидация входных данных на границе API (Zod / Pydantic / Go structs).
-2. **Бизнес-логика**: исполнение в рамках изолированного модуля или доменного сервиса.
-3. **Хранилище**: фиксация изменений в БД в пределах атомарной транзакции (Drizzle ORM / PostgreSQL).
-4. **Асинхронные задачи и AI**: отправка фоновых задач в BullMQ/Redis (векторизация, обращение к LLM API, длительный инференс через ONNX Runtime).
-5. **Автоматическая верификация**: прохождение automated gates (типизация, линтинг, автотесты) перед поставкой.
+### 1.2. Pluggable Modules
+- Each module solves a narrowly defined application problem (e.g., RAG vector search, webhook processing, report generation).
+- A module has a strictly typed input and output contract (DTO / Zod / Pydantic).
+- **Data isolation**: modules do not have direct access to other modules' private tables. Shared state is accessed strictly through core services or the event bus.
+- **Replaceability (Disposable Modules)**: modules can be updated or replaced through their contracts. When requirements change, choose between a local modification and replacement while considering compatibility, verification, and cost.
+- **Orchestration without a separate runtime**: topology selection, handoff, and side research rules are described in [docs/agent-routing.md](agent-routing.md); the standard does not require a dedicated orchestration server.
+- **Verification and impact policy**: pre-change impact, positive/negative/security/regression checks, and recovery are described in [docs/verification.md](verification.md).
 
 ---
 
-## 3. Архитектурные ограничения и безопасность
+## 2. Example Data Flow
 
-- Для защищённых операций проверяй доступ по модели проекта. Публичные операции определяй явно.
-- Храни секреты и API-ключи в предусмотренном проектом хранилище или окружении, вне исходного кода.
-- Логирование без утечки персональных данных (PII) и токенов авторизации.
-- Изоляция векторов и метаданных в мульти-тенантных RAG-пайплайнах: запросы никогда не возвращают эмбеддинги или документы чужого `tenantId / projectId`.
+1. **Incoming request**: fail-closed input validation at the API boundary (Zod / Pydantic / Go structs).
+2. **Business logic**: execution within an isolated module or domain service.
+3. **Storage**: persist database changes within an atomic transaction (Drizzle ORM / PostgreSQL).
+4. **Asynchronous tasks and AI**: dispatch background jobs to BullMQ/Redis (vectorization, LLM API calls, long-running inference through ONNX Runtime).
+5. **Automated verification**: pass automated gates (type checking, linting, automated tests) before delivery.
+
+---
+
+## 3. Architectural Constraints and Security
+
+- For protected operations, verify access according to the project's access model. Define public operations explicitly.
+- Store secrets and API keys in the project's designated storage or environment, outside source code.
+- Ensure logging does not leak personally identifiable information (PII) or authorization tokens.
+- Isolate vectors and metadata in multi-tenant RAG pipelines: queries never return embeddings or documents belonging to another `tenantId / projectId`.

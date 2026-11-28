@@ -1,48 +1,48 @@
-# Контракт дизайн-токенов и визуальных тем (Theme Tokens Specification)
+# Design Token and Visual Theme Contract (Theme Tokens Specification)
 
-> Этот файл предлагает набор семантических токенов для проекта, которому нужна смена тем. В существующем интерфейсе используй действующую дизайн-систему.
-> В компонентах, которые участвуют в тематизации, привязывай цвета к семантическим токенам. Это позволяет менять палитру через определения темы.
+> This file proposes a set of semantic tokens for a project that needs theme switching. In an existing interface, use the established design system.
+> For components that participate in theming, bind colors to semantic tokens. This allows the palette to change through theme definitions.
 
 ---
 
-## 1. Базовый контракт семантических токенов
+## 1. Basic Semantic Token Contract
 
-При использовании этого примера определяй значения токенов, на которые опираются компоненты. Ниже полный набор для демонстрационной темы.
+When using this example, define the values of the tokens that components rely on. The complete set for the demonstration theme follows.
 
 ```css
 :root {
-  /* Поверхности и фон */
-  --background: 0 0% 100%;             /* Основной фон страницы */
-  --foreground: 240 10% 3.9%;           /* Основной цвет текста */
-  --card: 0 0% 100%;                   /* Фон карточек и модулей */
-  --card-foreground: 240 10% 3.9%;      /* Текст на карточках */
-  --popover: 0 0% 100%;                /* Фон выпадающих списков и тултипов */
-  --popover-foreground: 240 10% 3.9%;   /* Текст в попапах */
+  /* Surfaces and background */
+  --background: 0 0% 100%;             /* Main page background */
+  --foreground: 240 10% 3.9%;           /* Main text color */
+  --card: 0 0% 100%;                   /* Background of cards and modules */
+  --card-foreground: 240 10% 3.9%;      /* Text on cards */
+  --popover: 0 0% 100%;                /* Background of dropdowns and tooltips */
+  --popover-foreground: 240 10% 3.9%;   /* Text in popovers */
 
-  /* Первичные и акцентные действия */
-  --primary: 240 5.9% 10%;             /* Primary CTA кнопка / акцент */
-  --primary-foreground: 0 0% 98%;      /* Текст на Primary кнопке */
-  --secondary: 240 4.8% 95.9%;         /* Второстепенная кнопка / бейдж */
-  --secondary-foreground: 240 5.9% 10%;/* Текст второстепенного элемента */
-  --accent: 240 4.8% 95.9%;            /* Акцентный интерактивный ховер */
-  --accent-foreground: 240 5.9% 10%;   /* Текст на акценте */
+  /* Primary and accent actions */
+  --primary: 240 5.9% 10%;             /* Primary CTA button / accent */
+  --primary-foreground: 0 0% 98%;      /* Text on primary button */
+  --secondary: 240 4.8% 95.9%;         /* Secondary button / badge */
+  --secondary-foreground: 240 5.9% 10%;/* Text on secondary element */
+  --accent: 240 4.8% 95.9%;            /* Accent for interactive hover states */
+  --accent-foreground: 240 5.9% 10%;   /* Text on accent */
 
-  /* Приглушенные элементы и границы */
-  --muted: 240 4.8% 95.9%;             /* Приглушенный фон (таблицы, инпуты) */
-  --muted-foreground: 240 3.8% 46.1%;  /* Вторичный приглушенный текст / плейсхолдер */
-  --border: 240 5.9% 90%;              /* Границы карточек, разделители */
-  --input: 240 5.9% 90%;               /* Границы полей ввода */
-  --ring: 240 5.9% 10%;                /* Фокусный контур (:focus-visible) */
+  /* Muted elements and borders */
+  --muted: 240 4.8% 95.9%;             /* Muted background (tables, inputs) */
+  --muted-foreground: 240 3.8% 46.1%;  /* Secondary muted text / placeholder */
+  --border: 240 5.9% 90%;              /* Card borders and dividers */
+  --input: 240 5.9% 90%;               /* Input field borders */
+  --ring: 240 5.9% 10%;                /* Focus ring (:focus-visible) */
 
-  /* Деструктивные действия */
-  --destructive: 0 84.2% 60.2%;        /* Ошибки, удаление, опасные действия */
-  --destructive-foreground: 0 0% 98%;  /* Текст на опасной кнопке */
+  /* Destructive actions */
+  --destructive: 0 84.2% 60.2%;        /* Errors, deletion, dangerous actions */
+  --destructive-foreground: 0 0% 98%;  /* Text on destructive button */
 
-  /* Радиусы скругления */
-  --radius: 0.5rem;                    /* Базовый радиус скругления кнопок и карточек */
+  /* Corner radii */
+  --radius: 0.5rem;                    /* Base corner radius for buttons and cards */
 }
 
-/* Тёмная тема (Dark Minimalist по умолчанию) */
+/* Dark theme (Dark Minimalist by default) */
 .dark, [data-theme="dark"] {
   --background: 240 10% 3.9%;
   --foreground: 0 0% 98%;
@@ -68,12 +68,12 @@
 
 ---
 
-## 2. Как добавлять новые темы (Zero Component Edits)
+## 2. How to Add New Themes (Zero Component Edits)
 
-Чтобы подключить новую тему (например, `Nord`, `Cyberpunk`, `Corporate Blue`), достаточно объявить новый селектор в CSS-файле тем проекта:
+To add a new theme (for example, `Nord`, `Cyberpunk`, or `Corporate Blue`), simply declare a new selector in the project's theme CSS file:
 
 ```css
-/* Пример: Скандинавская палитра (Nord Theme) */
+/* Example: Nordic palette (Nord Theme) */
 [data-theme="nord"] {
   --background: 220 16% 22%;
   --foreground: 218 27% 94%;
@@ -98,19 +98,19 @@
 }
 ```
 
-**Компоненты не меняются.** Смена темы происходит простым переключением атрибута:
+**Components remain unchanged.** Switch the theme by changing the attribute:
 ```html
 <html data-theme="nord">
 ```
 
 ---
 
-## 3. Маппинг в Tailwind CSS / фреймворки
+## 3. Mapping to Tailwind CSS / Frameworks
 
-В файле конфигурации Tailwind (`tailwind.config.ts` или CSS-переменные v4):
+In the Tailwind configuration file (`tailwind.config.ts` or v4 CSS variables):
 
 ```typescript
-// Пример интеграции токенов в Tailwind v3/v4:
+// Example of token integration in Tailwind v3/v4:
 colors: {
   background: "hsl(var(--background) / <alpha-value>)",
   foreground: "hsl(var(--foreground) / <alpha-value>)",
@@ -132,11 +132,11 @@ colors: {
 
 ---
 
-## 4. Инварианты верстки для ИИ-агента
+## 4. UI Implementation Invariants for the AI Agent
 
-1. ❌ **Запрещено:** `<div className="bg-[#121212] text-gray-400">`
-2. ✅ **Обязательно:** `<div className="bg-card text-muted-foreground border border-border">`
-3. ❌ **Запрещено:** `<button className="bg-blue-600 hover:bg-blue-700">`
-4. ✅ **Обязательно:** `<button className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring">`
-5. ❌ **Запрещено:** Кликабельный `div` со слушателем клика.
-6. ✅ **Обязательно:** Семантический `<button>` с явным типом `type="button"`.
+1. ❌ **Prohibited:** `<div className="bg-[#121212] text-gray-400">`
+2. ✅ **Required:** `<div className="bg-card text-muted-foreground border border-border">`
+3. ❌ **Prohibited:** `<button className="bg-blue-600 hover:bg-blue-700">`
+4. ✅ **Required:** `<button className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring">`
+5. ❌ **Prohibited:** A clickable `div` with a click listener.
+6. ✅ **Required:** A semantic `<button>` with the explicit type `type="button"`.
